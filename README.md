@@ -11,3 +11,8 @@ Free tools for Kubernetes (k8s)
 
 ![SPN Reset](assets/images/spn-reset.gif)
 
+---
+## <p align="">🔧 AKS Cluster State Check</p>
+
+![State Check](assets/images/state-check.gif)
+
