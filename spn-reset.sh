@@ -22,8 +22,9 @@ echo "
 # Github     : $github
 # Microsoft  : $microsoft
 # --------------------------------------------------------------
-# How to use:
-# Exemples:
+# How to use: Execute file ./spn-reset, type your Resource Group Name
+# and your Cluter Name.
+# Exemples: rg-eastus and next your cluster name: aks-prod
 # --------------------------------------------------------------
 "
 
