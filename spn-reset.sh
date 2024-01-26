@@ -13,8 +13,8 @@ github='https://github.com/PhilipMello/k8s/'
 microsoft='https://learn.microsoft.com/en-us/azure/aks/update-credentials#update-or-create-a-new-service-principal-for-your-aks-cluster'
 echo "
 # --------------------------------------------------------------
-# Script     :
-# Description:
+# Script     : Service Principal Name (SPN) RESET
+# Description: Update or create a new service principal for your AKS cluster
 # Version    : $version
 # Date       : $current_date
 # Author     : $author
