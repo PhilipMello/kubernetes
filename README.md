@@ -1,7 +1,10 @@
 # <p align="center">🔧 Kubernetes Tools</p>
 
-## 📝 About
-Free tools for Kubernetes (k8s)
+# 📝 About
+## Free tools for Kubernetes (k8s) 
+# 📚 Index
+🔖 [Service Principal Name (SPN) RESET](#️-spn-reset)<br>
+🔖 [AKS Cluster State Check](#️-sate-check)<br>
 
 ---
 ## <p align="">🔧 Service Principal Name (SPN) RESET</p>
