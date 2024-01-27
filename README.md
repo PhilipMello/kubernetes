@@ -23,5 +23,8 @@
 ---
 # 🔧 MSI SPN Check
 
+### Microsoft Official Documentation
+[Service principal names | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/ad/service-principal-names "Service principal names | Microsoft Learn")
+
 ![MSI SPN Check](assets/images/msi-spn-check.gif)
 
