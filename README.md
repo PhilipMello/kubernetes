@@ -5,6 +5,7 @@
 # 📚 Index
 🔖 [Service Principal Name (SPN) RESET](#-service-principal-name-spn-reset)<br>
 🔖 [AKS Cluster State Check](#-aks-cluster-state-check)<br>
+🔖 [MSI SPN Check](#-msi-spn-check)<br>
 
 ---
 # 🔧 Service Principal Name (SPN) RESET
@@ -18,4 +19,9 @@
 # 🔧 AKS Cluster State Check
 
 ![State Check](assets/images/state-check.gif)
+
+---
+# 🔧 MSI SPN Check
+
+![MSI SPN Check](assets/images/msi-spn-check.gif)
 
