@@ -3,7 +3,7 @@
 # 📝 About
 ## Free tools for Kubernetes (k8s) 
 # 📚 Index
-🔖 [Service Principal Name (SPN) RESET](#️-service-principal-name-spn-reset)<br>
+🔖 [Service Principal Name (SPN) RESET](#-service-principal-name-spn-reset)<br>
 🔖 [AKS Cluster State Check](#-aks-cluster-state-check)<br>
 
 ---
