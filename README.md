@@ -1,4 +1,4 @@
-# <p align="center">🔧 Kubernetes Tools</p>
+# <p align="center">🔧 Azure Kubernetes Tools (AKS)</p>
 
 # 📝 About
 ## Free tools for Kubernetes (k8s) 
