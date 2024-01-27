@@ -1,4 +1,32 @@
 #!/usr/bin/env bash
+# Author
+author="Philip Mello <@Microsoft>"
+# Version
+version="1.0"
+# License
+license="MIT"
+# Date
+current_date=$(date +'%b %d, %Y')
+# GitHub
+github='https://github.com/PhilipMello/k8s/'
+# Microsoft Official Documentation
+microsoft=''
+echo "
+# --------------------------------------------------------------
+# Script     : AKS Cluster State Check
+# Description: AKS Cluster State Check
+# Version    : $version
+# Date       : $current_date
+# Author     : $author
+# License    : $license
+# Github     : $github
+# Microsoft  : $microsoft
+# --------------------------------------------------------------
+# How to use: Execute file ./state-check to verify if Cluste is SPN or MSI
+# and your Cluter Name.
+# Exemples: 
+# --------------------------------------------------------------
+"
 
 GREEN="\033[97;102m"
 RED="\033[97;41m"
