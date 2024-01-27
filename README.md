@@ -24,7 +24,8 @@
 # 🔧 MSI SPN Check
 
 ### Microsoft Official Documentation
-[Service principal names | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/ad/service-principal-names "Service principal names | Microsoft Learn")
+[Service principal names | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/ad/service-principal-names "Service principal names | Microsoft Learn")<br>
+[Use a service principal with Azure Kubernetes Service (AKS)](https://learn.microsoft.com/en-us/azure/aks/kubernetes-service-principal?tabs=azure-cli "Use a service principal with Azure Kubernetes Service (AKS) | Microsoft Learn")<br>
 
 ![MSI SPN Check](assets/images/msi-spn-check.gif)
 
