@@ -26,10 +26,11 @@ echo "
 # Exemples:
 # --------------------------------------------------------------
 "
-
 WHITE=""
-BLUE=""
-YELLOW="\033[97;105m"
+BLUE="\033[97;104m"
+YELLOW="\033[97;103m"
+CYAN="\033[97;106m"
+MAGENTA="\033[97;45m"
 GREEN="\033[97;102m"
 RED="\033[97;41m"
 ENDCOLOR="\e[0m"
@@ -46,8 +47,13 @@ akscreate=$(az aks create --resource-group $resourcegroup --name $clustername --
 
 echo -e "
 +-----------------------+
-|${BLUE}Creating AKS cluster...${ENDCOLOR}|
+|${MAGENTA}Creating AKS cluster...${ENDCOLOR}|
 +-----------------------+
+"
+echo -e "
++----------------------------------------------------------------+
+|${BLUE}AKS cluster creation initiated. This might take a few minutes...${ENDCOLOR}|
++----------------------------------------------------------------+
 "
 
 eval $akscreate
