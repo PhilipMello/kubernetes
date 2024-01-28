@@ -38,9 +38,9 @@ ENDCOLOR="\e[0m"
 read -p "Type your Resource Group: " resourcegroup
 read -p "Type your Cluster name: " clustername
 read -p "Choose location: " location
-reap -p "How many nodes? " nodecount
-reap -p "Which Network Plugin (azure or kubenet): " networkplugin
-reap -p "AKS pricing tier {free, premium, standard}: " tier
+read -p "How many nodes? " nodecount
+read -p "Which Network Plugin (azure or kubenet): " networkplugin
+read -p "AKS pricing tier {free, premium, standard}: " tier
 
 akscreate=$(az aks create --resource-group $resourcegroup --name $clustername --location $location --node-count $nodecount
 --network-plugin $networkplugin --tier $tier)
