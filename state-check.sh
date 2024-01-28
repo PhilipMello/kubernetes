@@ -14,7 +14,7 @@ microsoft=''
 echo "
 # --------------------------------------------------------------
 # Script     : AKS Cluster State Check
-# Description: AKS Cluster State Check
+# Description: Check if cluster is "Failed State" or "Succeeded"
 # Version    : $version
 # Date       : $current_date
 # Author     : $author
@@ -22,8 +22,7 @@ echo "
 # Github     : $github
 # Microsoft  : $microsoft
 # --------------------------------------------------------------
-# How to use: Execute file ./state-check to verify if Cluste is SPN or MSI
-# and your Cluter Name.
+# How to use: Execute file ./state-check to verify if "Failed State" or "Succeeded"
 # Exemples: 
 # --------------------------------------------------------------
 "
