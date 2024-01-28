@@ -42,9 +42,6 @@ read -p "How many nodes? " nodecount
 read -p "Which Network Plugin (azure or kubenet): " networkplugin
 read -p "AKS pricing tier {free, premium, standard}: " tier
 
-akscreate=$(az aks create --resource-group $resourcegroup --name $clustername --location $location --node-count $nodecount
---network-plugin $networkplugin --tier $tier)
-
 echo -e "
 +-----------------------+
 |${MAGENTA}Creating AKS cluster...${ENDCOLOR}|
@@ -55,6 +52,9 @@ echo -e "
 |${BLUE}AKS cluster creation initiated. This might take a few minutes...${ENDCOLOR}|
 +----------------------------------------------------------------+
 "
+
+akscreate=$(az aks create --resource-group $resourcegroup --name $clustername --location $location --node-count $nodecount
+--network-plugin $networkplugin --tier $tier)
 
 eval $akscreate
 
