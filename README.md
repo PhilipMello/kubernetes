@@ -6,6 +6,7 @@
 🔖 [Service Principal Name (SPN) RESET](#-service-principal-name-spn-reset)<br>
 🔖 [AKS Cluster State Check](#-aks-cluster-state-check)<br>
 🔖 [MSI SPN Check](#-msi-spn-check)<br>
+🔖 [AKS Create](#-aks-create)<br>
 
 ---
 # 🔧 Service Principal Name (SPN) RESET
@@ -28,4 +29,11 @@
 [Use a service principal with Azure Kubernetes Service (AKS)](https://learn.microsoft.com/en-us/azure/aks/kubernetes-service-principal?tabs=azure-cli "Use a service principal with Azure Kubernetes Service (AKS) | Microsoft Learn")<br>
 
 ![MSI SPN Check](assets/images/msi-spn-check.gif)
+
+---
+# 🔧 AKS Create
+
+### Microsoft Official Documentation
+[az aks create (aks-preview extension) | Microsoft Learn](https://learn.microsoft.com/en-us/cli/azure/aks?view=azure-cli-latest#az-aks-create "az aks create (aks-preview extension)")
+
 
