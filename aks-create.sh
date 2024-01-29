@@ -53,13 +53,20 @@ echo -e "
 +----------------------------------------------------------------+
 "
 
-akscreate=$(az aks create --resource-group $resourcegroup --name $clustername --location $location --node-count $nodecount
---network-plugin $networkplugin --tier $tier)
+akscreate=$(az aks create --resource-group $resourcegroup --name $clustername --location $location --node-count $nodecount --network-plugin $networkplugin --tier $tier)
 
 eval $akscreate
 
-echo -e "
-+--------------------------------------------+
-|${GREEN}xxxxxxxxxxxxxxxxx${ENDCOLOR}|
-+--------------------------------------------+
+if [ $? -eq 0 ]; then
+    echo -e "
++---------------------------------+
+|${GREEN}AKS Cluster creation SUCCESSFULLY${ENDCOLOR}|
++---------------------------------+
 "
+else
+    echo -e "
++---------------------------+
+|${RED}AKS Cluster creation FAILED${ENDCOLOR}|
++---------------------------+
+"
+fi
