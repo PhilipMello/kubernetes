@@ -96,7 +96,7 @@ function check_credentials_status() {
     echo "Enter Cluster Name:"
     read cluster_name
 
-    # Check cluster credemtials
+    # Check cluster credentials
     credentials_status=$(az aks show --resource-group $resource_group --name $cluster_name --query servicePrincipalProfile.clientId -o tsv)
     credentials_list=$(az ad app credential list --id $credentials_status --query "[].endDateTime" -o tsv)
     echo "$credentials_status"
@@ -121,11 +121,37 @@ function reset_spn_credentials() {
     SP_UPDATE=$(az aks update-credentials --resource-group $resource_group --name $cluster_name --reset-service-principal --service-principal "$SP_ID" --client-secret "${SP_SECRET}")
     eval $SP_UPDATE
 
+    keyId=$(az ad app credential list --id $SP_ID --query [].keyId -o tsv)
+
     echo -e "
     +--------------------------------------------+
     |${GREEN}Status: Service Principal Name (SPN) Updated${ENDCOLOR}|
-    +--------------------------------------------+
+    +---------------------------------------------------------+
+    |App Registrations: $SP_ID  |
+    |Secret Password $SP_SECRET |
+    |Secret ID: $keyId          |
+    +---------------------------------------------------------+
     "
+}
+
+function cluster_analysis() {
+    echo "Enter Resource Group:"
+    read resource_group
+    echo "Enter Cluster Name:"
+    read cluster_name
+
+    # Get the credentials for the AKS cluster
+    az aks get-credentials --resource-group $resourceGroup --name $clusterName
+
+    credentials_status=$(az aks show --resource-group $resource_group --name $cluster_name --query servicePrincipalProfile.clientId -o tsv)
+    credentials_list=$(az ad app credential list --id $credentials_status --query "[].endDateTime" -o tsv)
+    power_state=$(az aks show --resource-group $resource_group --name $cluster_name  --query powerState -o tsv)
+    provisioning_state=$(az aks show --resource-group $resource_group --name $cluster_name --query provisioningState -o tsv)
+    echo "$credentials_status"
+    echo "$credentials_list"
+    echo "$power_state"
+    echo "$provisioning_state"
+
 }
 
 # TODO: Implement functions to check if cluster has PDB and if SPN is expired. 
@@ -137,6 +163,7 @@ echo "2. Delete AKS"
 echo "3. Check Cluster Status"
 echo "4. Check Cluster Credentials"
 echo "5. Reset Cluster Service Principal Credentials (SPN)"
+echo "99. Cluster Analysis"
 read option
 
 case $option in
@@ -154,6 +181,9 @@ case $option in
         ;;
     5)
         reset_spn_credentials
+        ;;
+    99)
+        cluster_analysis
         ;;
     *)
         echo "Invalid option"
