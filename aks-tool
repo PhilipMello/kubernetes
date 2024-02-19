@@ -8,7 +8,8 @@ license="MIT"
 # Date
 current_date=$(date +'%b %d, %Y')
 # GitHub
-github='https://github.com/PhilipMello/k8s/'
+github='https://github.com/PhilipMello/kubernetes/'
+github2='https://github.com/AtomyCloud/kubernetes'
 # Microsoft Official Documentation
 microsoft=''
 echo "
@@ -20,9 +21,10 @@ echo "
 # Author     : $author
 # License    : $license
 # Github     : $github
+# Github     : $github2
 # Microsoft  : $microsoft
 # --------------------------------------------------------------
-# How to use: Execute ./aks
+# How to use: Execute ./aks-tool
 # Exemples:
 # --------------------------------------------------------------
 "
