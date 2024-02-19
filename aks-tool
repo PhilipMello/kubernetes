@@ -1,0 +1,159 @@
+#!/usr/bin/env bash
+# Author
+author="Philip Mello <@Microsoft>"
+# Version
+version="1.0"
+# License
+license="MIT"
+# Date
+current_date=$(date +'%b %d, %Y')
+# GitHub
+github='https://github.com/PhilipMello/k8s/'
+# Microsoft Official Documentation
+microsoft=''
+echo "
+# --------------------------------------------------------------
+# Script     : Microsoft Azure AKS Script Automation
+# Description: Create, Delete, Check, Fix. Azure AKS Cluster
+# Version    : $version
+# Date       : $current_date
+# Author     : $author
+# License    : $license
+# Github     : $github
+# Microsoft  : $microsoft
+# --------------------------------------------------------------
+# How to use: Execute ./aks
+# Exemples:
+# --------------------------------------------------------------
+"
+WHITE=""
+BLUE="\033[97;104m"
+YELLOW="\033[97;103m"
+CYAN="\033[97;106m"
+MAGENTA="\033[97;45m"
+GREEN="\033[97;102m"
+RED="\033[97;41m"
+ENDCOLOR="\e[0m"
+
+function create_aks() {
+    echo "Enter Resource Group Name:"
+    read resource_group
+    echo "Enter Cluster Name:"
+    read cluster_name
+    echo "Enter Location:{eastus, swedencentral}"
+    read location
+    echo "Enter Node Count:{1, 2, 3,...}"
+    read node_count
+    echo "Enter Network Plugin:{azure, kubenet, none}"
+    read network_plugin
+    echo "Enter Tier:{free, premium, standard}"
+    read tier
+    echo "Enter OS SKU:{AzureLinux, CBLMariner, Mariner, Ubuntu}"
+    read os_sku
+    echo "Enter Node VM Size:{standard_ds2_v2}"
+    read node_vm_size
+    echo "Enter Managed Identity (MSI) OR Service Princiapl Name (SPN):{msi, spn}"
+    read msi_or_spn
+
+    if [[ "$msi_or_spn" == "msi" ]]; then
+        msi_or_spn="--tags ManagedCluster:PhilipMelloScriptAutomation"
+    elif [[ "$msi_or_spn" == "spn" ]]; then
+        msi_or_spn="--service-principal --tags ServicePrincipal:PhilipMelloScriptAutomation"
+    else
+        echo "Invalid input. Please enter MSI or SPN."
+    fi
+
+    # Create AKS cluster
+    az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn
+}
+
+function delete_aks() {
+    echo "Enter Resource Group:"
+    read resource_group
+    echo "Enter Cluster Name:"
+    read cluster_name
+
+    # Delete AKS cluster
+    az aks delete --resource-group $resource_group --name $cluster_name
+}
+
+function check_cluster_status() {
+    echo "Enter Resource Group:"
+    read resource_group
+    echo "Enter Cluster Name:"
+    read cluster_name
+
+    # Check if cluster is stopped or failed
+    cluster_status=$(az aks show --resource-group $resource_group --name $cluster_name --query provisioningState -o tsv)
+    echo "Cluster status: $cluster_status"
+}
+
+function check_credentials_status() {
+    echo "Enter Resource Group:"
+    read resource_group
+    echo "Enter Cluster Name:"
+    read cluster_name
+
+    # Check cluster credemtials
+    credentials_status=$(az aks show --resource-group $resource_group --name $cluster_name --query servicePrincipalProfile.clientId -o tsv)
+    credentials_list=$(az ad app credential list --id $credentials_status --query "[].endDateTime" -o tsv)
+    echo "$credentials_status"
+    echo "$credentials_list"
+}
+
+function reset_spn_credentials() {
+    echo "Enter Resource Group:"
+    read resource_group
+    echo "Enter Cluster Name:"
+    read cluster_name
+
+    echo -e "
+    +---------------------------------------------+
+    |${RED}Status: Updating Service Principal Name (SPN)${ENDCOLOR}|
+    +---------------------------------------------+
+    "
+
+    # Reset Service Princial Credentials (SPN)
+    SP_ID=$(az aks show --resource-group $resource_group --name $cluster_name --query servicePrincipalProfile.clientId -o tsv)
+    SP_SECRET=$(az ad app credential reset --id "$SP_ID" --query password -o tsv)
+    SP_UPDATE=$(az aks update-credentials --resource-group $resource_group --name $cluster_name --reset-service-principal --service-principal "$SP_ID" --client-secret "${SP_SECRET}")
+    eval $SP_UPDATE
+
+    echo -e "
+    +--------------------------------------------+
+    |${GREEN}Status: Service Principal Name (SPN) Updated${ENDCOLOR}|
+    +--------------------------------------------+
+    "
+}
+
+# TODO: Implement functions to check if cluster has PDB and if SPN is expired. 
+# These features are not directly supported by Azure CLI and may require additional tools or custom scripts.
+
+echo "Choose an option:"
+echo "1. Create AKS"
+echo "2. Delete AKS"
+echo "3. Check Cluster Status"
+echo "4. Check Cluster Credentials"
+echo "5. Reset Cluster Service Principal Credentials (SPN)"
+read option
+
+case $option in
+    1)
+        create_aks
+        ;;
+    2)
+        delete_aks
+        ;;
+    3)
+        check_cluster_status
+        ;;
+    4)
+        check_credentials_status
+        ;;
+    5)
+        reset_spn_credentials
+        ;;
+    *)
+        echo "Invalid option"
+        ;;
+esac
