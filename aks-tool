@@ -135,7 +135,6 @@ function reset_spn_credentials() {
 }
 
 function check_pdb() {
-
     # Check if the AKS cluster has a PDB
     pdbCount=$(kubectl get pdb --all-namespaces | wc -l)
 
@@ -144,6 +143,16 @@ function check_pdb() {
     else
         echo -e "${GREEN}|The AKS cluster does not have a Pod Disruption Budget.${ENDCOLOR}|"
     fi
+}
+
+function backup_pdb() {
+    # Set your output file name here
+    OUTPUT_FILE="pdb_backup.txt"
+
+    # Get all PDBs in all namespaces
+    kubectl get pdb --all-namespaces -o json > $OUTPUT_FILE
+
+    echo "All PDBs have been backed up to $OUTPUT_FILE."
 }
 
 function check_memory_pressure() {
@@ -195,7 +204,8 @@ echo "3. Check Cluster Status"
 echo "4. Check Cluster Credentials"
 echo "5. Reset Cluster Service Principal Credentials (SPN)"
 echo "6. Check Pod Disruption Budget (PDB)"
-echo "7. Check Memory Pressure"
+echo "7. Backup Pod Disruption Budget (PDB)"
+echo "8. Check Memory Pressure"
 echo "99. Cluster Analysis"
 read option
 
@@ -219,6 +229,9 @@ case $option in
         check_pdb
         ;;
     7)
+        backup_pdb
+        ;;
+    8)
         check_memory_pressure
         ;;
     99)
