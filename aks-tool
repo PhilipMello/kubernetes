@@ -134,6 +134,29 @@ function reset_spn_credentials() {
     "
 }
 
+function check_pdb() {
+
+    # Check if the AKS cluster has a PDB
+    pdbCount=$(kubectl get pdb --all-namespaces | wc -l)
+
+    if [ $pdbCount -gt 1 ]; then
+        echo -e "${RED}|The AKS cluster has a Pod Disruption Budget.${ENDCOLOR}|"
+    else
+        echo -e "${GREEN}|The AKS cluster does not have a Pod Disruption Budget.${ENDCOLOR}|"
+    fi
+}
+
+function check_memory_pressure() {
+
+    # Check for memory pressure
+    MEMORY_PRESSURE=$(kubectl describe nodes | grep "MemoryPressure")
+    if [[ $MEMORY_PRESSURE == *"True"* ]]; then
+        echo -e "${RED}|The cluster has memory pressure${ENDCOLOR}|"
+    else
+        echo -e "${GREEN}|The cluster does not have memory pressure${ENDCOLOR}|"
+    fi
+}
+
 function cluster_analysis() {
     echo "Enter Resource Group:"
     read resource_group
@@ -141,21 +164,29 @@ function cluster_analysis() {
     read cluster_name
 
     # Get the credentials for the AKS cluster
-    az aks get-credentials --resource-group $resourceGroup --name $clusterName
+    #az aks get-credentials --resource-group $resourceGroup --name $clusterName
 
     credentials_status=$(az aks show --resource-group $resource_group --name $cluster_name --query servicePrincipalProfile.clientId -o tsv)
-    credentials_list=$(az ad app credential list --id $credentials_status --query "[].endDateTime" -o tsv)
+    credentials_endtime=$(az ad app credential list --id $credentials_status --query "[].endDateTime" -o tsv)
     power_state=$(az aks show --resource-group $resource_group --name $cluster_name  --query powerState -o tsv)
     provisioning_state=$(az aks show --resource-group $resource_group --name $cluster_name --query provisioningState -o tsv)
-    echo "$credentials_status"
-    echo "$credentials_list"
-    echo "$power_state"
-    echo "$provisioning_state"
+    check_pdb=$(kubectl get pdb --all-namespaces | wc -l)
 
+    echo -e "
+    +--------------------------------------------+
+    |${GREEN}AKS Analysis${ENDCOLOR}             |
+    +---------------------------------------------------------+
+    |SPN or MSI: $credentials_status                          |
+    |Credentials End Time: $credentials_endtime               |
+    |Power State: $power_state                                |
+    |Provisioning State: $provisioning_state                  |
+    |${RED}Check PDB(If Non 0 has PDB): $check_pdb${ENDCOLOR} |
+    +---------------------------------------------------------+
+    "
 }
 
-# TODO: Implement functions to check if cluster has PDB and if SPN is expired. 
-# These features are not directly supported by Azure CLI and may require additional tools or custom scripts.
+# 
+# 
 
 echo "Choose an option:"
 echo "1. Create AKS"
@@ -163,6 +194,8 @@ echo "2. Delete AKS"
 echo "3. Check Cluster Status"
 echo "4. Check Cluster Credentials"
 echo "5. Reset Cluster Service Principal Credentials (SPN)"
+echo "6. Check Pod Disruption Budget (PDB)"
+echo "7. Check Memory Pressure"
 echo "99. Cluster Analysis"
 read option
 
@@ -181,6 +214,12 @@ case $option in
         ;;
     5)
         reset_spn_credentials
+        ;;
+    6)
+        check_pdb
+        ;;
+    7)
+        check_memory_pressure
         ;;
     99)
         cluster_analysis
