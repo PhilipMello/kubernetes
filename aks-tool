@@ -166,6 +166,27 @@ function check_memory_pressure() {
     fi
 }
 
+function enable_or_disable_monitoring_logs() {
+    # Enable or Disable Monitoring logs
+    # Microsoft Official documentation: https://learn.microsoft.com/en-us/azure/azure-monitor/containers/kubernetes-monitoring-disable
+    echo "Enter Resource Group:"
+    read resource_group
+    echo "Enter Cluster Name:"
+    read cluster_name
+    echo "Choose Option: (1 = Enable / 2 = Disable)"
+    read addons_option
+
+    if [[ "$addons_option" == "1" ]]; then
+        echo "Enabling Monitoring Logs"
+        az aks enable-addons -a monitoring --resource-group $resource_group --name $cluster_name
+    elif [[ "$addons_option" == "2" ]]; then
+        echo "Disabling Monitoring Logs"
+        az aks disable-addons -a monitoring --resource-group $resource_group --name $cluster_name
+    else
+        echo "Incorret Option"
+    fi
+}
+
 function cluster_analysis() {
     echo "Enter Resource Group:"
     read resource_group
@@ -206,6 +227,7 @@ echo "5. Reset Cluster Service Principal Credentials (SPN)"
 echo "6. Check Pod Disruption Budget (PDB)"
 echo "7. Backup Pod Disruption Budget (PDB)"
 echo "8. Check Memory Pressure"
+echo "9. Enable or Disable Monitoring logs"
 echo "99. Cluster Analysis"
 read option
 
@@ -233,6 +255,9 @@ case $option in
         ;;
     8)
         check_memory_pressure
+        ;;
+    9)
+        enable_or_disable_monitoring_logs
         ;;
     99)
         cluster_analysis
