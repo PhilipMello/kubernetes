@@ -3,12 +3,19 @@
 # 📝 About
 ## Free tools for Kubernetes (k8s) 
 # 📚 Index
+🔖 [AKS Tool](#-aks-tool)<br>
 🔖 [Service Principal Name (SPN) RESET](#-service-principal-name-spn-reset)<br>
 🔖 [AKS Cluster State Check](#-aks-cluster-state-check)<br>
 🔖 [MSI SPN Check](#-msi-spn-check)<br>
 🔖 [AKS Create](#-aks-create)<br>
 
 ---
+# 🔧 AKS Tool
+
+![AKS Tool](assets/images/aks-tool.png)
+
+---
+
 # 🔧 Service Principal Name (SPN) RESET
 
 ### Microsoft Official Documentation
