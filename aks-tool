@@ -139,7 +139,6 @@ function check_pdb() {
 
     command="kubectl get pdb --all-namespaces"
     pattern="0"
-
     output=$($command | grep "$pattern")
 
     if echo "$output" | grep -q "0"; then
@@ -227,26 +226,45 @@ function cluster_analysis() {
         echo -e "${GREEN}|The cluster DOES NOT have PID pressure${ENDCOLOR}|"
     fi)
 
+    check_pdb_status=$(command="kubectl get pdb --all-namespaces"
+    pattern="0"
+    output_pdb=$($command | grep "$pattern")
+
+    if echo "$output_pdb" | grep -q "0"; then
+        echo -e "
+        "$output"
+        ${RED}|The AKS cluster has a Pod Disruption Budget.${ENDCOLOR}|
+        "
+    else
+        echo -e "${GREEN}|The AKS cluster does not have a Pod Disruption Budget.${ENDCOLOR}|"
+    fi)
+
     k8s_version=$(az aks show --resource-group $resource_group --name $cluster_name --query currentKubernetesVersion -o tsv)
     credentials_status=$(az aks show --resource-group $resource_group --name $cluster_name --query servicePrincipalProfile.clientId -o tsv)
     credentials_endtime=$(az ad app credential list --id $credentials_status --query "[].endDateTime" -o tsv)
     power_state=$(az aks show --resource-group $resource_group --name $cluster_name  --query powerState -o tsv)
     provisioning_state=$(az aks show --resource-group $resource_group --name $cluster_name --query provisioningState -o tsv)
-    check_pdb=$(kubectl get pdb --all-namespaces | grep "0")
-
+    pdbCount=$(kubectl get pdb --all-namespaces | wc -l)
+    pdbCount2=$(kubectl get pdb --all-namespaces | grep "0")
+    pdbCount_message="AKS cluster has $pdbCount PDBs 
+    and PDB: ${RED}$pdbCount2${ENDCOLOR}
+    is not allowing for disruption, 
+    warning: this may not allow the node to be drained and therefore blocking an upgrade process."
     echo -e "
-    +--------------------------------------------+
-    |${GREEN}AKS Analysis${ENDCOLOR}             |
+    +---------------------+
+    |${GREEN}AKS Analysis${ENDCOLOR}
     +---------------------------------------------------------+
     |Kubernetes Version: $k8s_version
-    |SPN or MSI: $credentials_status                          |
-    |Credentials End Time: $credentials_endtime               |
-    |Power State: $power_state                                |
-    |Provisioning State: $provisioning_state                  |
-    |${RED}Check PDB(If Non 0 has PDB): $check_pdb${ENDCOLOR} |
+    |SPN or MSI: $credentials_status 
+    |Credentials End Time: $credentials_endtime               
+    |Power State: $power_state                                
+    |Provisioning State: $provisioning_state                  
     |$check_memory_pressure_status
     |$check_disk_pressure_status
     |$check_disk_pid_status
+    +---------------------------------------------------------+
+    |$check_pdb_status
+    |$pdbCount_message
     +---------------------------------------------------------+
     "
 }
