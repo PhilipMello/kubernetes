@@ -220,6 +220,7 @@ function cluster_analysis() {
         echo -e "${GREEN}|The cluster DOES NOT have PID pressure${ENDCOLOR}|"
     fi)
 
+    k8s_version=$(az aks show --resource-group $resource_group --name $cluster_name --query currentKubernetesVersion -o tsv)
     credentials_status=$(az aks show --resource-group $resource_group --name $cluster_name --query servicePrincipalProfile.clientId -o tsv)
     credentials_endtime=$(az ad app credential list --id $credentials_status --query "[].endDateTime" -o tsv)
     power_state=$(az aks show --resource-group $resource_group --name $cluster_name  --query powerState -o tsv)
@@ -230,6 +231,7 @@ function cluster_analysis() {
     +--------------------------------------------+
     |${GREEN}AKS Analysis${ENDCOLOR}             |
     +---------------------------------------------------------+
+    |Kubernetes Version: $k8s_version
     |SPN or MSI: $credentials_status                          |
     |Credentials End Time: $credentials_endtime               |
     |Power State: $power_state                                |
