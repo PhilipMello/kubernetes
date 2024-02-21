@@ -134,12 +134,19 @@ function reset_spn_credentials() {
     "
 }
 
+# Check if the AKS cluster has a PDB
 function check_pdb() {
-    # Check if the AKS cluster has a PDB
-    pdbCount=$(kubectl get pdb --all-namespaces | wc -l)
 
-    if [ $pdbCount -gt 1 ]; then
-        echo -e "${RED}|The AKS cluster has a Pod Disruption Budget.${ENDCOLOR}|"
+    command="kubectl get pdb --all-namespaces"
+    pattern="0"
+
+    output=$($command | grep "$pattern")
+
+    if echo "$output" | grep -q "0"; then
+        echo -e "
+        "$output"
+        ${RED}|The AKS cluster has a Pod Disruption Budget.${ENDCOLOR}|
+        "
     else
         echo -e "${GREEN}|The AKS cluster does not have a Pod Disruption Budget.${ENDCOLOR}|"
     fi
@@ -225,7 +232,7 @@ function cluster_analysis() {
     credentials_endtime=$(az ad app credential list --id $credentials_status --query "[].endDateTime" -o tsv)
     power_state=$(az aks show --resource-group $resource_group --name $cluster_name  --query powerState -o tsv)
     provisioning_state=$(az aks show --resource-group $resource_group --name $cluster_name --query provisioningState -o tsv)
-    check_pdb=$(kubectl get pdb --all-namespaces | wc -l)
+    check_pdb=$(kubectl get pdb --all-namespaces | grep "0")
 
     echo -e "
     +--------------------------------------------+
