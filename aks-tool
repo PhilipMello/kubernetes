@@ -162,13 +162,29 @@ function check_memory_pressure() {
     if [[ $MEMORY_PRESSURE == *"True"* ]]; then
         echo -e "${RED}|The cluster has memory pressure${ENDCOLOR}|"
     else
-        echo -e "${GREEN}|The cluster does not have memory pressure${ENDCOLOR}|"
+        echo -e "${GREEN}|The cluster DOES NOT have memory pressure${ENDCOLOR}|"
     fi
 }
 
-':function check_provisioning_state() {
-    az aks show --resource-group $resource_group --name $cluster_name --query provisioningState -o tsv
-}'
+# Check for PID pressure
+function check_disk_pid_status() {
+    PID_PRESSURE=$(kubectl describe nodes | grep "PIDPressure")
+    if [[ $PID_PRESSURE == *"True"* ]]; then
+        echo -e "${RED}|The cluster has PID pressure${ENDCOLOR}|"
+    else
+        echo -e "${GREEN}|The cluster DOES NOT have PID pressure${ENDCOLOR}|"
+    fi
+}
+
+function check_disk_pressure_status() {
+    # Check for disk pressure
+    DISK_PRESSURE=$(kubectl describe nodes | grep "DiskPressure")
+    if [[ $DISK_PRESSURE == *"True"* ]]; then
+        echo -e "${RED}|The cluster has disk pressure${ENDCOLOR}|"
+    else
+        echo -e "${GREEN}|The cluster DOES NOT have disk pressure${ENDCOLOR}|"
+    fi
+}
 
 function enable_or_disable_monitoring_logs() {
     # Enable or Disable Monitoring logs
@@ -188,26 +204,6 @@ function enable_or_disable_monitoring_logs() {
         az aks disable-addons -a monitoring --resource-group $resource_group --name $cluster_name
     else
         echo "Incorret Option"
-    fi
-}
-
-    # Check for PID pressure
-function check_disk_pid_status() {
-    PID_PRESSURE=$(kubectl describe nodes | grep "PIDPressure")
-    if [[ $PID_PRESSURE == *"True"* ]]; then
-        echo -e "${RED}|The cluster has PID pressure${ENDCOLOR}|"
-    else
-        echo -e "${GREEN}|The cluster DOES NOT have PID pressure${ENDCOLOR}|"
-    fi
-}
-
-function check_disk_pressure_status() {
-    # Check for disk pressure
-    DISK_PRESSURE=$(kubectl describe nodes | grep "DiskPressure")
-    if [[ $DISK_PRESSURE == *"True"* ]]; then
-        echo -e "${RED}|The cluster has disk pressure${ENDCOLOR}|"
-    else
-        echo -e "${GREEN}|The cluster DOES NOT have disk pressure${ENDCOLOR}|"
     fi
 }
 
