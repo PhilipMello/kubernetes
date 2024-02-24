@@ -12,7 +12,7 @@
 ---
 # 🔧 AKS Tool
 
-![AKS Tool](assets/images/aks-tool.png)
+![AKS Tool](assets/images/aks-tool.gif)
 
 ---
 
