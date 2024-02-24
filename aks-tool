@@ -37,6 +37,16 @@ GREEN="\033[97;102m"
 RED="\033[97;41m"
 ENDCOLOR="\e[0m"
 
+function create_aks_default() {
+    echo "Enter Resource Group Name:"
+    read resource_group
+    echo "Enter Cluster Name:"
+    read cluster_name
+
+    # Create AKS Default
+    az aks create --resource-group $resource_group --name $cluster_name --node-count 1
+}
+
 function create_aks() {
     echo "Enter Resource Group Name:"
     read resource_group
@@ -80,15 +90,19 @@ function delete_aks() {
 }
 
 function check_cluster_status() {
-    # Check if cluster is stopped or failed
-    cluster_status=$(az aks show --resource-group $resource_group --name $cluster_name --query provisioningState -o tsv)
-    echo "Cluster Status: $cluster_status"
+    # Check if cluster is: Stopped, Faieled, Succeeded, K8S Version
+    k8s_version=$(az aks show --resource-group $resource_group --name $cluster_name --query currentKubernetesVersion -o tsv)
+    power_state=$(az aks show --resource-group $resource_group --name $cluster_name  --query powerState -o tsv)
+    provisioning_state=$(az aks show --resource-group $resource_group --name $cluster_name --query provisioningState -o tsv)
+    echo "Cluster Status: $k8s_version"
+    echo "Power State: $power_state"
+    echo "Provisining State: $provisioning_state"
 }
 
 function check_credentials_status() {
     # Check cluster credentials
     credentials_status=$(az aks show --resource-group $resource_group --name $cluster_name --query servicePrincipalProfile.clientId -o tsv)
-    credentials_list=$(az ad app credential list --id $credentials_status --query "[].endDateTime" -o tsv)
+    credentials_endtime=$(az ad app credential list --id $credentials_status --query "[].endDateTime" -o tsv)
     echo "$credentials_status"
     echo "$credentials_list"
 }
@@ -208,6 +222,7 @@ function enable_or_disable_monitoring_logs() {
 }
 
 function cluster_analysis() {
+    # AKS Cluster Analysis
     echo "Enter Resource Group:"
     read resource_group
     echo "Enter Cluster Name:"
@@ -218,20 +233,11 @@ function cluster_analysis() {
     |${MAGENTA}Analysing Cluster...${ENDCOLOR}   |
     +-----------------------+
     "
-
-    k8s_version=$(az aks show --resource-group $resource_group --name $cluster_name --query currentKubernetesVersion -o tsv)
-    credentials_status=$(az aks show --resource-group $resource_group --name $cluster_name --query servicePrincipalProfile.clientId -o tsv)
-    credentials_endtime=$(az ad app credential list --id $credentials_status --query "[].endDateTime" -o tsv)
-    power_state=$(az aks show --resource-group $resource_group --name $cluster_name  --query powerState -o tsv)
-
+    
     echo -e "
     +---------------------------------------------------------+
     |${GREEN}AKS Analysis${ENDCOLOR}
-    +---------------------------------------------------------+
-    |Kubernetes Version: $k8s_version
-    |SPN or MSI: $credentials_status
-    |Credentials End Time: $credentials_endtime              
-    |Power State: $power_state                    
+    +---------------------------------------------------------+       
     |$(check_cluster_status)
     |$(check_memory_pressure)
     |$(check_disk_pressure_status)
@@ -245,44 +251,32 @@ function cluster_analysis() {
 # ---
 
 echo "Choose an option:"
-echo "1. Create AKS"
-echo "2. Delete AKS"
-echo "3. Check Cluster Status"
-echo "4. Check Cluster Credentials"
-echo "5. Reset Cluster Service Principal Credentials (SPN)"
-echo "6. Check Pod Disruption Budget (PDB)"
-echo "7. Backup Pod Disruption Budget (PDB)"
-echo "8. Check Memory Pressure"
-echo "9. Enable or Disable Monitoring logs"
-echo "99. Cluster Analysis"
+echo "1. Create AKS Default"
+echo "2. Create AKS with other options"
+echo "3. Delete AKS"
+echo "4. Reset Cluster Service Principal Credentials (SPN)"
+echo "5. Backup Pod Disruption Budget (PDB)"
+echo "6. Enable or Disable Monitoring Logs"
+echo "99. Cluster Analysis (MSI, SPN, PDB, PowerState, Credentials,...)"
 read option
 
 case $option in
-    1)
-        create_aks
+    1)  
+        create_aks_default
         ;;
     2)
-        delete_aks
+        create_aks
         ;;
     3)
-        check_cluster_status
+        delete_aks
         ;;
     4)
-        check_credentials_status
-        ;;
-    5)
         reset_spn_credentials
         ;;
-    6)
-        check_pdb
-        ;;
-    7)
+    5)
         backup_pdb
         ;;
-    8)
-        check_memory_pressure
-        ;;
-    9)
+    6)
         enable_or_disable_monitoring_logs
         ;;
     99)
