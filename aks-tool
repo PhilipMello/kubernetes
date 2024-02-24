@@ -94,9 +94,9 @@ function check_cluster_status() {
     k8s_version=$(az aks show --resource-group $resource_group --name $cluster_name --query currentKubernetesVersion -o tsv)
     power_state=$(az aks show --resource-group $resource_group --name $cluster_name  --query powerState -o tsv)
     provisioning_state=$(az aks show --resource-group $resource_group --name $cluster_name --query provisioningState -o tsv)
-    echo "Cluster Status: $k8s_version"
-    echo "Power State: $power_state"
-    echo "Provisining State: $provisioning_state"
+    echo "Cluster Status: $k8s_version
+    |Power State: $power_state
+    |Provisioning State: $provisioning_state"
 }
 
 function check_credentials_status() {
@@ -228,16 +228,20 @@ function cluster_analysis() {
     echo "Enter Cluster Name:"
     read cluster_name
 
-    echo -e "
+       echo -e "
     +-----------------------+
     |${MAGENTA}Analysing Cluster...${ENDCOLOR}   |
     +-----------------------+
     "
-    
+
+function cluster_on_off() {
+    power_state=$(az aks show --resource-group $resource_group --name $cluster_name --query powerState -o tsv)
+    if [[ "$power_state" != "Stopped" ]]; then
     echo -e "
-    +---------------------------------------------------------+
+    +-------------------------------------------------------------------------+
     |${GREEN}AKS Analysis${ENDCOLOR}
-    +---------------------------------------------------------+       
+    |Resource Group: $resource_group || Cluster Name: $cluster_name
+    +-------------------------------------------------------------------------+       
     |$(check_cluster_status)
     |$(check_memory_pressure)
     |$(check_disk_pressure_status)
@@ -246,6 +250,19 @@ function cluster_analysis() {
     |$(check_pdb)
     +---------------------------------------------------------+
     "
+    else
+        echo -e "
+    +-------------------------------------------------------------------------+
+    |${GREEN}AKS Analysis${ENDCOLOR}
+    |${RED}Start your cluster to analyze in more detail${ENDCOLOR}
+    |Resource Group: $resource_group || Cluster Name: $cluster_name
+    +-------------------------------------------------------------------------+       
+    |$(check_cluster_status)
+    +---------------------------------------------------------+
+    "
+    fi
+    }
+    cluster_on_off
 }
 
 # ---
