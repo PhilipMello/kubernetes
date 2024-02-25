@@ -26,6 +26,7 @@ echo "
 # --------------------------------------------------------------
 # How to use: Execute ./aks-tool
 # Exemples:
+# Manual: ./aks-tool -h OR ./aks-tool --h OR ./aks-tool --help
 # --------------------------------------------------------------
 "
 WHITE=""
@@ -266,6 +267,20 @@ function cluster_on_off() {
 }
 
 # ---
+
+# Manual
+manual() {
+echo "Option 1, create AKS cluster with default option in Azure (FAST)"
+echo "Option 2, create a cluster by passing the parameters:
+--location --node-count --network-plugin --tier --os-sku --node-vm-size $msi_or_spn
+"
+exit 0
+}
+
+if [[ $1 == "-h" || $1 == "--help" || "$1" == "--h" ]]; then
+    manual
+    exit 1
+fi
 
 echo "Choose an option:"
 echo "1. Create AKS Default"
