@@ -159,8 +159,6 @@ function check_pdb() {
     fi
 }
 
-#----
-
 function backup_pdb() {
     # Set your output file name here
     OUTPUT_FILE="pdb_backup.txt"
@@ -220,6 +218,14 @@ function enable_or_disable_monitoring_logs() {
     else
         echo "Incorret Option"
     fi
+}
+
+function check_acr_connection() {
+    az acr list -o table
+    echo "Enter ACR Name"
+    read acr_link
+    acr_token=$(az account get-access-token -o tsv --query=accessToken)
+    curl -H "Authorization: Bearer $acr_token"  https://$acr_link.azurecr.io/oauth2/exchange
 }
 
 function cluster_analysis() {
@@ -289,6 +295,7 @@ echo "3. Delete AKS"
 echo "4. Reset Cluster Service Principal Credentials (SPN)"
 echo "5. Backup Pod Disruption Budget (PDB)"
 echo "6. Enable or Disable Monitoring Logs"
+echo "7. Check ACR Connection"
 echo "99. Cluster Analysis (MSI, SPN, PDB, PowerState, Credentials,...)"
 read option
 
@@ -310,6 +317,9 @@ case $option in
         ;;
     6)
         enable_or_disable_monitoring_logs
+        ;;
+    7)
+        check_acr_connection
         ;;
     99)
         cluster_analysis
