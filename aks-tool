@@ -228,6 +228,11 @@ function check_acr_connection() {
     curl -H "Authorization: Bearer $acr_token"  https://$acr_link.azurecr.io/oauth2/exchange
 }
 
+function get_aks_url() {
+    # Get AKS URL Azure Portal
+    az aks browse --resource-group $resource_group --name $cluster_name
+}
+
 function cluster_analysis() {
     # AKS Cluster Analysis
     echo "Enter Resource Group:"
