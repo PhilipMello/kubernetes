@@ -233,6 +233,16 @@ function get_aks_url() {
     az aks browse --resource-group $resource_group --name $cluster_name
 }
 
+function get_top_pods() {
+    # Get top pods by memory
+    kubectl top pods --sort-by=memory -A
+}
+
+function get_top_pods() {
+    # Get top nodes by memory
+    kubectl top nodes --sort-by=memory
+}
+
 function cluster_analysis() {
     # AKS Cluster Analysis
     echo "Enter Resource Group:"
@@ -253,7 +263,11 @@ function cluster_on_off() {
     +-------------------------------------------------------------------------+
     |${GREEN}AKS Analysis${ENDCOLOR}
     |Resource Group: $resource_group || Cluster Name: $cluster_name
-    +-------------------------------------------------------------------------+       
+    +-------------------------------------------------------------------------+
+    |$(get_aks_url)
+    |
+    |
+    +-------------------------------------------------------------------------+        
     |$(check_cluster_status)
     |$(check_memory_pressure)
     |$(check_disk_pressure_status)
@@ -272,6 +286,12 @@ function cluster_on_off() {
     |$(check_cluster_status)
     +-------------------------------------------------------------------------+
     |Run: az aks start --resource-group $resource_group --name $cluster_name
+    +-------------------------------------------------------------------------+
+    | or go to Azure Portal to Start
+    +-------------------------------------------------------------------------+
+    |$(get_aks_url)
+    |
+    |
     +-------------------------------------------------------------------------+
     "
     fi
