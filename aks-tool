@@ -228,19 +228,36 @@ function check_acr_connection() {
     curl -H "Authorization: Bearer $acr_token"  https://$acr_link.azurecr.io/oauth2/exchange
 }
 
-function get_aks_url() {
+function aks_get_url() {
     # Get AKS URL Azure Portal
     az aks browse --resource-group $resource_group --name $cluster_name
 }
 
-function get_top_pods() {
+function aks_get_top_nodes() {
+    # Get top nodes by memory
+    kubectl top nodes --sort-by=memory
+}
+
+function aks_get_top_pods() {
     # Get top pods by memory
     kubectl top pods --sort-by=memory -A
 }
 
-function get_top_pods() {
-    # Get top nodes by memory
-    kubectl top nodes --sort-by=memory
+function aks_describe_nodes() {
+    # Describe nodes
+    echo ""
+}
+
+function aks_check_top() {
+    # Get Pod, Node Logs
+
+    folderlogs=aks-top-logs
+    mkdir $folderlogs
+    kubectl top nodes --sort-by=memory > $folderlogs/topNodes.txt
+    kubectl top pods --sort-by=memory -A > $folderlogs/topPods.txt
+    zip -r aks-top-logs.zip $folderlogs
+    echo "Logs has been saved in $folderlogs and zip file: aks-top-logs.zip"
+
 }
 
 function cluster_analysis() {
@@ -264,7 +281,7 @@ function cluster_on_off() {
     |${GREEN}AKS Analysis${ENDCOLOR}
     |Resource Group: $resource_group || Cluster Name: $cluster_name
     +-------------------------------------------------------------------------+
-    |$(get_aks_url)
+    |$(aks_get_url)
     |
     |
     +-------------------------------------------------------------------------+        
@@ -275,6 +292,11 @@ function cluster_on_off() {
     +---------------------------------------------------------+
     |$(check_pdb)
     +---------------------------------------------------------+
+    |NODES:
+    |$(aks_get_top_nodes)
+    +---------------------------------------------------------+
+    |PODS:
+    |$(aks_get_top_pods)
     "
     else
         echo -e "
@@ -289,7 +311,7 @@ function cluster_on_off() {
     +-------------------------------------------------------------------------+
     | or go to Azure Portal to Start
     +-------------------------------------------------------------------------+
-    |$(get_aks_url)
+    |$(aks_get_url)
     |
     |
     +-------------------------------------------------------------------------+
@@ -323,6 +345,7 @@ echo "4. Reset Cluster Service Principal Credentials (SPN)"
 echo "5. Backup Pod Disruption Budget (PDB)"
 echo "6. Enable or Disable Monitoring Logs"
 echo "7. Check ACR Connection"
+echo "8 Check Top (Pods and Nodes)"
 echo "99. Cluster Analysis (MSI, SPN, PDB, PowerState, Credentials,...)"
 read option
 
@@ -347,6 +370,9 @@ case $option in
         ;;
     7)
         check_acr_connection
+        ;;
+    8) 
+        aks_check_top
         ;;
     99)
         cluster_analysis
