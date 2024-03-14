@@ -230,7 +230,8 @@ function check_acr_connection() {
 
 function aks_get_url() {
     # Get AKS URL Azure Portal
-    az aks browse --resource-group $resource_group --name $cluster_name
+    aks_azure_link=$(az aks browse --resource-group $resource_group --name $cluster_name)
+    echo "$aks_azure_link"
 }
 
 function aks_get_top_nodes() {
@@ -257,6 +258,37 @@ function aks_check_top() {
     kubectl top pods --sort-by=memory -A > $folderlogs/topPods.txt
     zip -r aks-top-logs.zip $folderlogs
     echo "Logs has been saved in $folderlogs and zip file: aks-top-logs.zip"
+
+}
+
+function aks_tcpdump() {
+    # Get tcpdump
+    # https://github.com/josecaneira/aks-lab/tree/main/tcpdump_daemonset
+
+    echo -e "
+    +-------------------------------------------------------------------------+
+    |A PV/PVC file share will be created on the AKS cluster default storage account 
+    |that then can be browsed on your cluster managed Resource Group "MC_" using Azure Portal. 
+    |If no default storage account exists a new one will be created, 
+    |please remember to delete it after it no longer being required.
+    |
+    +-------------------------------------------------------------------------+"
+    kubectl apply -f https://github.com/josecaneira/aks-lab/raw/main/tcpdump_daemonset/tcpdump_ds.yaml
+    kubectl get pv|grep tcpdump
+
+}
+function aks_get_syslog() {
+    # Get SysLog
+    kubectl get nodes
+    echo "Enter node name"
+    read node_name
+    kubectl debug node/$node_name --image=nginx
+	kubectl get pods
+    echo "Enter pods name"
+    read pod_name
+	kubectl cp $pod_name:/host/var/log/ /tmp/log
+	zip -r syslog.zip /tmp/log
+    echo "Logs has been saved in syslog.zip in the current folder"
 
 }
 
@@ -345,7 +377,9 @@ echo "4. Reset Cluster Service Principal Credentials (SPN)"
 echo "5. Backup Pod Disruption Budget (PDB)"
 echo "6. Enable or Disable Monitoring Logs"
 echo "7. Check ACR Connection"
-echo "8 Check Top (Pods and Nodes)"
+echo "8. Check Top (Pods and Nodes)"
+echo "9. Get TCPDUMP"
+echo "10. Get SysLog"
 echo "99. Cluster Analysis (MSI, SPN, PDB, PowerState, Credentials,...)"
 read option
 
@@ -373,6 +407,12 @@ case $option in
         ;;
     8) 
         aks_check_top
+        ;;
+    9)
+        aks_tcpdump
+        ;;
+    10) 
+        aks_get_syslog
         ;;
     99)
         cluster_analysis
