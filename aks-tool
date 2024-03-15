@@ -292,6 +292,11 @@ function aks_get_syslog() {
 
 }
 
+function aks_get_configmap() {
+    # Get Configmap
+    kubectl get configmap -A
+}
+
 function cluster_analysis() {
     # AKS Cluster Analysis
     echo "Enter Resource Group:"
@@ -329,6 +334,9 @@ function cluster_on_off() {
     +---------------------------------------------------------+
     |PODS:
     |$(aks_get_top_pods)
+    +---------------------------------------------------------+
+    |Configmap:
+    |$(aks_get_configmap)
     "
     else
         echo -e "
