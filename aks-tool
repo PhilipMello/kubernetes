@@ -139,8 +139,8 @@ function reset_spn_credentials() {
     "
 }
 
-# Check if the AKS cluster has a PDB
 function check_pdb() {
+    # Check if the AKS cluster has a PDB
     pdbCount=$(kubectl get pdb --all-namespaces | wc -l)
     pdbCount2=$(kubectl get pdb --all-namespaces | grep "0")
     command="kubectl get pdb --all-namespaces"
@@ -165,7 +165,6 @@ function backup_pdb() {
 
     # Get all PDBs in all namespaces
     kubectl get pdb --all-namespaces -o json > $OUTPUT_FILE
-
     echo "All PDBs have been backed up to $OUTPUT_FILE."
 }
 
@@ -179,8 +178,8 @@ function check_memory_pressure() {
     fi
 }
 
-# Check for PID pressure
 function check_disk_pid_status() {
+    # Check for PID pressure
     PID_PRESSURE=$(kubectl describe nodes | grep "PIDPressure")
     if [[ $PID_PRESSURE == *"True"* ]]; then
         echo -e "${RED}|The cluster has PID pressure${ENDCOLOR}|"
