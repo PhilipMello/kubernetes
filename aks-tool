@@ -309,6 +309,8 @@ function aks_information() {
 
 function aks_version_list_location() {
     # List AKS version by location
+    echo "Enter location"
+    read location
     az aks get-versions --location $location --output table
 }
 
@@ -403,6 +405,7 @@ echo "7. Check ACR Connection"
 echo "8. Check Top (Pods and Nodes)"
 echo "9. Get TCPDUMP"
 echo "10. Get SysLog"
+echo "11. Get AKS Versions by location"
 echo "99. Cluster Analysis (MSI, SPN, PDB, PowerState, Credentials,...)"
 read option
 
@@ -436,6 +439,9 @@ case $option in
         ;;
     10) 
         aks_get_syslog
+        ;;
+    11)
+        aks_version_list_location
         ;;
     99)
         cluster_analysis
