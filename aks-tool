@@ -232,7 +232,8 @@ function check_acr_connection() {
 function aks_get_url() {
     # Get AKS URL Azure Portal
     aks_azure_link=$(az aks browse --resource-group $resource_group --name $cluster_name)
-    echo "$aks_azure_link"
+    echo "
+    |$aks_azure_link"
 }
 
 function aks_get_top_nodes() {
@@ -309,6 +310,7 @@ function aks_information() {
 
 function aks_version_list_location() {
     # List AKS version by location
+    az account list-locations -o table
     echo "Enter location"
     read location
     az aks get-versions --location $location --output table
@@ -336,8 +338,6 @@ function cluster_on_off() {
     |Resource Group: $resource_group || Cluster Name: $cluster_name
     +-------------------------------------------------------------------------+
     |$(aks_get_url)
-    |
-    |
     +-------------------------------------------------------------------------+        
     |$(check_cluster_status)
     |$(check_memory_pressure)
