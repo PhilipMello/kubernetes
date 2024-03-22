@@ -162,7 +162,7 @@ function check_pdb() {
 
 function backup_pdb() {
     # Set your output file name here
-    OUTPUT_FILE="pdb_backup.txt"
+    OUTPUT_FILE="pdb_backup.yaml"
 
     # Get all PDBs in all namespaces
     kubectl get pdb --all-namespaces -o json > $OUTPUT_FILE
@@ -314,6 +314,12 @@ function aks_version_list_location() {
     echo "Enter location"
     read location
     az aks get-versions --location $location --output table
+}
+
+function aks_get_pv_pvc() {
+    # List all PV and PVC
+    kubectl get pv
+    kubectl get pvc
 }
 
 function cluster_analysis() {
