@@ -49,6 +49,7 @@ function create_aks_default() {
 }
 
 function create_aks() {
+    # Create AKS cluster
     echo "Enter Resource Group Name:"
     read resource_group
     echo "Enter Cluster Name:"
@@ -76,17 +77,16 @@ function create_aks() {
         echo "Invalid input. Please enter MSI or SPN."
     fi
 
-    # Create AKS cluster
     az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn
 }
 
 function delete_aks() {
+    # Delete AKS cluster
     echo "Enter Resource Group:"
     read resource_group
     echo "Enter Cluster Name:"
     read cluster_name
 
-    # Delete AKS cluster
     az aks delete --resource-group $resource_group --name $cluster_name
 }
 
@@ -141,6 +141,7 @@ function reset_spn_credentials() {
 
 function check_pdb() {
     # Check if the AKS cluster has a PDB
+    # Microsoft Official documentation: https://learn.microsoft.com/en-us/troubleshoot/azure/azure-kubernetes/error-code-poddrainfailure#symptoms
     pdbCount=$(kubectl get pdb --all-namespaces | wc -l)
     pdbCount2=$(kubectl get pdb --all-namespaces | grep "0")
     command="kubectl get pdb --all-namespaces"
@@ -220,6 +221,7 @@ function enable_or_disable_monitoring_logs() {
 }
 
 function check_acr_connection() {
+    # Check ACR connection issues
     az acr list -o table
     echo "Enter ACR Name"
     read acr_link
@@ -250,7 +252,6 @@ function aks_describe_nodes() {
 
 function aks_check_top() {
     # Get Pod, Node Logs
-
     folderlogs=aks-top-logs
     mkdir $folderlogs
     kubectl top nodes --sort-by=memory > $folderlogs/topNodes.txt
@@ -276,6 +277,7 @@ function aks_tcpdump() {
     kubectl get pv|grep tcpdump
 
 }
+
 function aks_get_syslog() {
     # Get SysLog
     kubectl get nodes
@@ -294,6 +296,20 @@ function aks_get_syslog() {
 function aks_get_configmap() {
     # Get Configmap
     kubectl get configmap -A
+}
+
+function aks_information() {
+    # AKS insights
+    az aks show --resource-group $resource_group --name $cluster_name --query linuxProfile.adminUsername -o tsv
+    az aks show --resource-group $resource_group --name $cluster_name --query linuxProfile.ssh.publicKeys[0].keyData -o tsv
+    az aks show --resource-group $resource_group --name $cluster_name --query location -o tsv
+    az aks show --resource-group $resource_group --name $cluster_name --query sku.tier -o tsv
+    az aks show --resource-group $resource_group --name $cluster_name --query nodeProvisioningProfile -o tsv
+}
+
+function aks_version_list_location() {
+    # List AKS version by location
+    az aks get-versions --location $location --output table
 }
 
 function cluster_analysis() {
