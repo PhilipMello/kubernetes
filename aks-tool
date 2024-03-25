@@ -308,6 +308,47 @@ function aks_information() {
     az aks show --resource-group $resource_group --name $cluster_name --query nodeProvisioningProfile -o tsv
 }
 
+function aks_nodepool_information() {
+    # Nodepoool information
+    # Microsoft Official documentation: https://learn.microsoft.com/en-US/cli/azure/aks/nodepool?view=azure-cli-latest#az_aks_nodepool_list
+    az aks nodepool list $resource_group --name $cluster_name -o wide
+}
+
+function aks_update_upgrade() {
+    # Update OR Upgrade
+    echo "1. Upgrade AKS"
+    echo "2. Upgrade Nodepool"
+    echo "Enter your option:"
+    read option
+
+    case $option in
+    1)
+        echo "Enter Resource Group:"
+        read resource_group
+        echo "Enter Cluster Name:"
+        read cluster_name
+        echo "Enter your desired Kubernetes Version | Ex: 1.27.9, 1.28.3, 1.28.5"
+        read k8s_version
+        az aks upgrade --resource-group $resource_group --name $cluster_name --kubernetes-version $k8s_version
+        ;;
+    2)
+        echo "Enter Resource Group:"
+        read resource_group
+        echo "Enter Cluster Name:"
+        read cluster_name
+        echo "Enter your Nodepool Name"
+        read nodepool_name
+        echo "Enter your desired Kubernetes Version | Ex: 1.27.9, 1.28.3, 1.28.5"
+        read k8s_version
+        az aks nodepool upgrade --resource-group $resource_group --cluster-name $cluster_name --name $nodepool_name --kubernetes-version $k8s_version
+        ;;
+    *)
+        echo "Invalid choice. Please select 1 or 2."
+        ;;
+
+    esac
+}
+
 function aks_version_list_location() {
     # List AKS version by location
     az account list-locations -o table
@@ -412,6 +453,7 @@ echo "8. Check Top (Pods and Nodes)"
 echo "9. Get TCPDUMP"
 echo "10. Get SysLog"
 echo "11. Get AKS Versions by location"
+echo "12. Upgrade AKS or Nodepool"
 echo "99. Cluster Analysis (MSI, SPN, PDB, PowerState, Credentials,...)"
 read option
 
@@ -448,6 +490,9 @@ case $option in
         ;;
     11)
         aks_version_list_location
+        ;;
+    12) 
+        aks_update_upgrade
         ;;
     99)
         cluster_analysis
