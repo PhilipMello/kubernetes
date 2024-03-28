@@ -45,14 +45,18 @@ function create_aks_default() {
     echo "Enter Cluster Name:"
     read cluster_name
 
+    echo -e "
     +-------------------------------------------------------------------------+
     |${MAGENTA}AKS Creating${ENDCOLOR}
-    +-------------------------------------------------------------------------+  
+    +-------------------------------------------------------------------------+
+    "  
     az aks create --resource-group $resource_group --name $cluster_name --node-count 1
+    echo -e "
     +-------------------------------------------------------------------------+
     |${GREEN}AKS Created${ENDCOLOR}
     |Resource Group: $resource_group || Cluster Name: $cluster_name
     +-------------------------------------------------------------------------+
+    "
     az aks get-credentials --resource-group $resource_group --name $cluster_name --overwrite-existing
 }
 
@@ -85,16 +89,20 @@ function create_aks() {
         echo "Invalid input. Please enter MSI or SPN."
     fi
 
+    echo -e "
     +-------------------------------------------------------------------------+
     |${MAGENTA}AKS Creating${ENDCOLOR}
-    +-------------------------------------------------------------------------+  
+    +-------------------------------------------------------------------------+
+    "  
     az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn
+    echo -e "
     +-------------------------------------------------------------------------+
     |${GREEN}AKS Created${ENDCOLOR}
     |Resource Group: $resource_group || Cluster Name: $cluster_name
     +-------------------------------------------------------------------------+
     |$(aks_get_url)
-    +-------------------------------------------------------------------------+  
+    +-------------------------------------------------------------------------+
+    "  
     az aks get-credentials --resource-group $resource_group --name $cluster_name --overwrite-existing
 }
 
@@ -105,9 +113,11 @@ function delete_aks() {
     echo "Enter Cluster Name:"
     read cluster_name
 
+    echo -e "
     +-------------------------------------------------------------------------+
     |${RED}Deleting AKS${ENDCOLOR}
-    +-------------------------------------------------------------------------+ 
+    +-------------------------------------------------------------------------+
+    "
     az aks delete --resource-group $resource_group --name $cluster_name
 }
 
@@ -463,9 +473,10 @@ function cluster_on_off() {
 
 # Manual
 manual() {
-echo "Option 1, create AKS cluster with default option in Azure (FAST)"
-echo "Option 2, create a cluster by passing the parameters:
---location --node-count --network-plugin --tier --os-sku --node-vm-size $msi_or_spn
+    echo -e "Get AKS Credentials: 'https://docs.microsoft.com/en-US/cli/azure/aks#az_aks_get_credentials'"
+    echo -e "Option 1, create AKS cluster with default option in Azure (FAST)"
+    echo -e "Option 2, create a cluster by passing the parameters:
+    --location --node-count --network-plugin --tier --os-sku --node-vm-size $msi_or_spn
 "
 exit 0
 }
