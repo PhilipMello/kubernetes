@@ -46,6 +46,7 @@ function create_aks_default() {
 
     # Create AKS Default
     az aks create --resource-group $resource_group --name $cluster_name --node-count 1
+    az aks get-credentials --resource-group $resource_group --name $cluster_name --overwrite-existing
 }
 
 function create_aks() {
@@ -54,7 +55,7 @@ function create_aks() {
     read resource_group
     echo "Enter Cluster Name:"
     read cluster_name
-    echo "Enter Location:{eastus, swedencentral}"
+    echo "Enter Location:{centralus, eastus, eastus2, swedencentral}"
     read location
     echo "Enter Node Count:{1, 2, 3,...}"
     read node_count
@@ -64,7 +65,7 @@ function create_aks() {
     read tier
     echo "Enter OS SKU:{AzureLinux, CBLMariner, Mariner, Ubuntu}"
     read os_sku
-    echo "Enter Node VM Size:{standard_ds2_v2}"
+    echo "Enter Node VM Size:{Standard_B2s, standard_ds2_v2}"
     read node_vm_size
     echo "Enter Managed Identity (MSI) OR Service Princiapl Name (SPN):{msi, spn}"
     read msi_or_spn
@@ -78,6 +79,7 @@ function create_aks() {
     fi
 
     az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn
+    az aks get-credentials --resource-group $resource_group --name $cluster_name --overwrite-existing
 }
 
 function delete_aks() {
@@ -315,6 +317,18 @@ function aks_nodepool_information() {
     az aks nodepool list $resource_group --name $cluster_name -o wide
 }
 
+function az_create_resource_group() {
+    # Create Resource Group
+    echo "Enter Resource Group Name:"
+    read resource_group
+    echo "To see locations run: az account list-locations -o table"
+    echo "Enter Resource Group location:"
+    read location
+    echo "Enter tag name, or hit enter to no tag"
+    read tags
+    az group create --name $resource_group --location $location --tags $tags
+}
+
 function aks_update_upgrade() {
     # Update OR Upgrade
     echo "1. Upgrade AKS"
@@ -443,56 +457,60 @@ if [[ $1 == "-h" || $1 == "--help" || "$1" == "--h" ]]; then
 fi
 
 echo "Choose an option:"
-echo "1. Create AKS Default"
-echo "2. Create AKS with other options"
-echo "3. Delete AKS"
-echo "4. Reset Cluster Service Principal Credentials (SPN)"
-echo "5. Backup Pod Disruption Budget (PDB)"
-echo "6. Enable or Disable Monitoring Logs"
-echo "7. Check ACR Connection"
-echo "8. Check Top (Pods and Nodes)"
-echo "9. Get TCPDUMP"
-echo "10. Get SysLog"
-echo "11. Get AKS Versions by location"
-echo "12. Upgrade AKS or Nodepool"
+echo "1. Create Resource Group"
+echo "2. Create AKS Default"
+echo "3. Create AKS with other options"
+echo "4. Delete AKS"
+echo "5. Reset Cluster Service Principal Credentials (SPN)"
+echo "6. Backup Pod Disruption Budget (PDB)"
+echo "7. Enable or Disable Monitoring Logs"
+echo "8. Check ACR Connection"
+echo "9. Check Top (Pods and Nodes)"
+echo "10. Get TCPDUMP"
+echo "11. Get SysLog"
+echo "12. Get AKS Versions by location"
+echo "13. Upgrade AKS or Nodepool"
 echo "99. Cluster Analysis (MSI, SPN, PDB, PowerState, Credentials,...)"
 read option
 
 case $option in
-    1)  
+    1)
+        az_create_resource_group
+        ;;
+    2)  
         create_aks_default
         ;;
-    2)
+    3)
         create_aks
         ;;
-    3)
+    4)
         delete_aks
         ;;
-    4)
+    5)
         reset_spn_credentials
         ;;
-    5)
+    6)
         backup_pdb
         ;;
-    6)
+    7)
         enable_or_disable_monitoring_logs
         ;;
-    7)
+    8)
         check_acr_connection
         ;;
-    8) 
+    9) 
         aks_check_top
         ;;
-    9)
+    10)
         aks_tcpdump
         ;;
-    10) 
+    11) 
         aks_get_syslog
         ;;
-    11)
+    12)
         aks_version_list_location
         ;;
-    12) 
+    13) 
         aks_update_upgrade
         ;;
     99)
