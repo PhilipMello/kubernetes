@@ -39,13 +39,20 @@ RED="\033[97;41m"
 ENDCOLOR="\e[0m"
 
 function create_aks_default() {
+    # Create AKS Default
     echo "Enter Resource Group Name:"
     read resource_group
     echo "Enter Cluster Name:"
     read cluster_name
 
-    # Create AKS Default
+    +-------------------------------------------------------------------------+
+    |${MAGENTA}AKS Creating${ENDCOLOR}
+    +-------------------------------------------------------------------------+  
     az aks create --resource-group $resource_group --name $cluster_name --node-count 1
+    +-------------------------------------------------------------------------+
+    |${GREEN}AKS Created${ENDCOLOR}
+    |Resource Group: $resource_group || Cluster Name: $cluster_name
+    +-------------------------------------------------------------------------+
     az aks get-credentials --resource-group $resource_group --name $cluster_name --overwrite-existing
 }
 
@@ -78,7 +85,16 @@ function create_aks() {
         echo "Invalid input. Please enter MSI or SPN."
     fi
 
+    +-------------------------------------------------------------------------+
+    |${MAGENTA}AKS Creating${ENDCOLOR}
+    +-------------------------------------------------------------------------+  
     az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn
+    +-------------------------------------------------------------------------+
+    |${GREEN}AKS Created${ENDCOLOR}
+    |Resource Group: $resource_group || Cluster Name: $cluster_name
+    +-------------------------------------------------------------------------+
+    |$(aks_get_url)
+    +-------------------------------------------------------------------------+  
     az aks get-credentials --resource-group $resource_group --name $cluster_name --overwrite-existing
 }
 
@@ -89,6 +105,9 @@ function delete_aks() {
     echo "Enter Cluster Name:"
     read cluster_name
 
+    +-------------------------------------------------------------------------+
+    |${RED}Deleting AKS${ENDCOLOR}
+    +-------------------------------------------------------------------------+ 
     az aks delete --resource-group $resource_group --name $cluster_name
 }
 
