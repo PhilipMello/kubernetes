@@ -407,6 +407,40 @@ function aks_get_pv_pvc() {
     kubectl get pvc
 }
 
+function aks_enable_disable_addon() {
+    # AKS Enable or Disable Addons
+    echo "1. Enable AKS Backup Extension"
+    echo "Enter your option:"
+    read option
+    case $option in
+    1)
+        # Microsoft Official Documentation: https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-cluster-manage-backups
+        echo "AKS Backup extension"
+        echo "Enter Resource Group:"
+        read resource_group
+        echo "Enter Cluster Name:"
+        read cluster_name
+        echo "Storage Account Name"
+        read storageaccount_name
+        echo "Blob Container Name"
+        read blobcontainer_name
+        echo "Storage Account Resource Group Name"
+        read storageaccount_resource_group_name
+        echo "Storage Account Subscription Id"
+        read storageaccountsubscriptionid
+        echo -e "
+        +-------------------------------------------------------------------------+
+        |${MAGENTA}Enabling AKS Backup Extension${ENDCOLOR}
+        +-------------------------------------------------------------------------+
+        "
+        az k8s-extension create --name azure-aks-backup --extension-type microsoft.dataprotection.kubernetes --scope cluster --cluster-type managedClusters --cluster-name $cluster_name --resource-group $resource_group --release-train stable --configuration-settings blobContainer=$blobcontainer_name storageAccount=$storageaccount_name storageAccountResourceGroup=$storageaccount_resource_group_name storageAccountSubscriptionId=$storageaccountsubscriptionid
+        ;;
+    *)
+        echo "Invalid choice. Please select 1 or 2."
+        ;;
+    esac
+}
+
 function cluster_analysis() {
     # AKS Cluster Analysis
     echo "Enter Resource Group:"
@@ -500,6 +534,7 @@ echo "10. Get TCPDUMP"
 echo "11. Get SysLog"
 echo "12. Get AKS Versions by location"
 echo "13. Upgrade AKS or Nodepool"
+echo "14. AKS Enable or Disable Addons"
 echo "99. Cluster Analysis (MSI, SPN, PDB, PowerState, Credentials,...)"
 read option
 
@@ -542,6 +577,9 @@ case $option in
         ;;
     13) 
         aks_update_upgrade
+        ;;
+    14)
+        aks_enable_disable_addon
         ;;
     99)
         cluster_analysis
