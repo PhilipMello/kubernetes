@@ -410,12 +410,14 @@ function aks_get_pv_pvc() {
 function aks_enable_disable_addon() {
     # AKS Enable or Disable Addons
     echo "1. Enable AKS Backup Extension"
+    echo "2. Disable AKS Backup Extension"
     echo "Enter your option:"
     read option
     case $option in
     1)
+        # Enable AKS Backup Extension
         # Microsoft Official Documentation: https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-cluster-manage-backups
-        echo "AKS Backup extension"
+        echo "Enable AKS Backup Extension"
         echo "Enter Resource Group:"
         read resource_group
         echo "Enter Cluster Name:"
@@ -434,6 +436,16 @@ function aks_enable_disable_addon() {
         +-------------------------------------------------------------------------+
         "
         az k8s-extension create --name azure-aks-backup --extension-type microsoft.dataprotection.kubernetes --scope cluster --cluster-type managedClusters --cluster-name $cluster_name --resource-group $resource_group --release-train stable --configuration-settings blobContainer=$blobcontainer_name storageAccount=$storageaccount_name storageAccountResourceGroup=$storageaccount_resource_group_name storageAccountSubscriptionId=$storageaccountsubscriptionid
+        ;;
+    2)
+        # Disable AKS Backup Extension
+        # Microsoft Official Documentation: https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-cluster-manage-backups
+        echo "Disable AKS Backup Extension"
+        echo "Enter Resource Group:"
+        read resource_group
+        echo "Enter Cluster Name:"
+        read cluster_name
+        az k8s-extension delete --resource-group $resource_group --cluster-name $cluster_name --cluster-type managedClusters --name azure-aks-backup
         ;;
     *)
         echo "Invalid choice. Please select 1 or 2."
