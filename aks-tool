@@ -445,6 +445,12 @@ function aks_enable_disable_addon() {
         read resource_group
         echo "Enter Cluster Name:"
         read cluster_name
+
+         echo -e "
+        +-------------------------------------------------------------------------+
+        |${RED}Disabling AKS Backup Extension${ENDCOLOR}
+        +-------------------------------------------------------------------------+
+        "
         az k8s-extension delete --resource-group $resource_group --cluster-name $cluster_name --cluster-type managedClusters --name azure-aks-backup
         ;;
     *)
