@@ -2,6 +2,9 @@
 
 # 📝 About
 ## Free tools for Kubernetes (k8s) 
+```
+wget https://raw.githubusercontent.com/PhilipMello/kubernetes/main/aks-tool && chmod +x aks-tool
+```
 # 📚 Index
 🔖 [AKS Tool](#-aks-tool)<br>
 🔖 [Service Principal Name (SPN) RESET](#-service-principal-name-spn-reset)<br>
