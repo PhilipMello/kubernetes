@@ -409,10 +409,18 @@ function aks_get_pv_pvc() {
 
 function aks_enable_disable_addon() {
     # AKS Enable or Disable Addons
+    echo -e "Microsoft Official Documentation:
+    'https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-cluster-manage-backups'
+    "
     echo "1. Enable AKS Backup Extension"
     echo "2. Disable AKS Backup Extension"
     echo "Enter your option:"
     read option
+
+    pause_function() {
+    read -p "Press Enter to continue the installation..."
+    }
+
     case $option in
     1)
         # Enable AKS Backup Extension
@@ -435,6 +443,19 @@ function aks_enable_disable_addon() {
         |${MAGENTA}Enabling AKS Backup Extension${ENDCOLOR}
         +-------------------------------------------------------------------------+
         "
+        echo -e "The registration may take up to 10 minutes. To monitor the registration process, wait the status to show:
+        Registered.
+        "
+        az provider register --namespace Microsoft.KubernetesConfiguration
+        watch az provider show -n Microsoft.KubernetesConfiguration -o table
+        pause_function
+        az extension add --name aks-preview
+        az extension update --name aks-preview
+        echo -e "It takes a few minutes for the status to show Registered."
+        az feature register --namespace "Microsoft.ContainerService" --name "TrustedAccessPreview"
+        watch az feature show --namespace "Microsoft.ContainerService" --name "TrustedAccessPreview"
+        pause_function
+        az provider register --namespace Microsoft.ContainerService
         az k8s-extension create --name azure-aks-backup --extension-type microsoft.dataprotection.kubernetes --scope cluster --cluster-type managedClusters --cluster-name $cluster_name --resource-group $resource_group --release-train stable --configuration-settings blobContainer=$blobcontainer_name storageAccount=$storageaccount_name storageAccountResourceGroup=$storageaccount_resource_group_name storageAccountSubscriptionId=$storageaccountsubscriptionid
         ;;
     2)
