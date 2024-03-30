@@ -459,6 +459,27 @@ function aks_enable_disable_addon() {
     esac
 }
 
+function az_cli_tools(){
+    # Az Cli Tools
+    case $option in
+    1)
+        # Install az-cli
+        # Microsoft Official Documentation: https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt
+        echo -e "
+        +-------------------------------------------------------------------------+
+        |${GREEN}Installing az-cli${ENDCOLOR}
+        +-------------------------------------------------------------------------+
+        "
+        curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+        ;;
+    2)
+        ;;
+    *)
+         echo "Invalid choice. Please select 1 or 2."
+        ;;
+    esac
+}
+
 function cluster_analysis() {
     # AKS Cluster Analysis
     echo "Enter Resource Group:"
