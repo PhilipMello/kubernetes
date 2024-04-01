@@ -525,7 +525,7 @@ function az_cli_tools(){
         +-------------------------------------------------------------------------+
         "
         curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-         echo -e "
+        echo -e "
         +-------------------------------------------------------------------------+
         |${GREEN}az-cli Installed${ENDCOLOR}
         +-------------------------------------------------------------------------+
@@ -536,6 +536,12 @@ function az_cli_tools(){
         echo -e "
         +-------------------------------------------------------------------------+
         |${MAGENTA}Installing kubectl${ENDCOLOR}
+        +-------------------------------------------------------------------------+
+        "
+        az aks install-cli
+        echo -e "
+        +-------------------------------------------------------------------------+
+        |${GREEN}kubectl Installed${ENDCOLOR}
         +-------------------------------------------------------------------------+
         "
         ;;
@@ -627,7 +633,7 @@ fi
 echo "Choose an option:"
 echo "1. Create Resource Group"
 echo "2. Create AKS"
-# echo "3. Create AKS with other options"
+echo "3. Az Tools (Install az-cli OR kubectl)"
 echo "4. Delete AKS"
 echo "5. Reset Cluster Service Principal Credentials (SPN)"
 echo "6. Backup Pod Disruption Budget (PDB)"
@@ -650,7 +656,7 @@ case $option in
         aks_creation
         ;;
     3)
-        create_aks
+        az_cli_tools
         ;;
     4)
         delete_aks
