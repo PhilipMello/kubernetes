@@ -38,32 +38,10 @@ GREEN="\033[97;102m"
 RED="\033[97;41m"
 ENDCOLOR="\e[0m"
 
-function create_aks_default() {
-    # Create AKS Default
-    echo "Enter Resource Group Name:"
-    read resource_group
-    echo "Enter Cluster Name:"
-    read cluster_name
-
-    echo -e "
-    +-------------------------------------------------------------------------+
-    |${MAGENTA}AKS Creating${ENDCOLOR}
-    +-------------------------------------------------------------------------+
-    "  
-    az aks create --resource-group $resource_group --name $cluster_name --node-count 1
-    echo -e "
-    +-------------------------------------------------------------------------+
-    |${GREEN}AKS Created${ENDCOLOR}
-    |Resource Group: $resource_group || Cluster Name: $cluster_name
-    +-------------------------------------------------------------------------+
-    "
-    az aks get-credentials --resource-group $resource_group --name $cluster_name --overwrite-existing
-}
-
-function aks_creation() {
+function aks_create() {
     # AKS Creation
     echo "1. Create AKS Default"
-    echo "1. Create AKS with more options (Location, Node-Count, Network-Plugin, Tier, OS-SKU, VM-Size)"
+    echo "2. Create AKS with more options (Location, Node-Count, Network-Plugin, Tier, OS-SKU, VM-Size)"
     read option
 
     case $option in
@@ -653,7 +631,7 @@ case $option in
         az_create_resource_group
         ;;
     2)  
-        aks_creation
+        aks_create
         ;;
     3)
         az_cli_tools
