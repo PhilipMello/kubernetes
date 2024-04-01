@@ -60,50 +60,83 @@ function create_aks_default() {
     az aks get-credentials --resource-group $resource_group --name $cluster_name --overwrite-existing
 }
 
-function create_aks() {
-    # Create AKS cluster
-    echo "Enter Resource Group Name:"
-    read resource_group
-    echo "Enter Cluster Name:"
-    read cluster_name
-    echo "Enter Location:{centralus, eastus, eastus2, swedencentral}"
-    read location
-    echo "Enter Node Count:{1, 2, 3,...}"
-    read node_count
-    echo "Enter Network Plugin:{azure, kubenet, none}"
-    read network_plugin
-    echo "Enter Tier:{free, premium, standard}"
-    read tier
-    echo "Enter OS SKU:{AzureLinux, CBLMariner, Mariner, Ubuntu}"
-    read os_sku
-    echo "Enter Node VM Size:{Standard_B2s, standard_ds2_v2}"
-    read node_vm_size
-    echo "Enter Managed Identity (MSI) OR Service Princiapl Name (SPN):{msi, spn}"
-    read msi_or_spn
+function aks_creation() {
+    # AKS Creation
+    echo "1. Create AKS Default"
+    echo "1. Create AKS with more options (Location, Node-Count, Network-Plugin, Tier, OS-SKU, VM-Size)"
+    read option
 
-    if [[ "$msi_or_spn" == "msi" ]]; then
-        msi_or_spn="--tags ManagedCluster:PhilipMelloScriptAutomation"
-    elif [[ "$msi_or_spn" == "spn" ]]; then
-        msi_or_spn="--service-principal --tags ServicePrincipal:PhilipMelloScriptAutomation"
-    else
-        echo "Invalid input. Please enter MSI or SPN."
-    fi
+    case $option in
+    1)
+        # Create AKS Default
+        echo "Enter Resource Group Name:"
+        read resource_group
+        echo "Enter Cluster Name:"
+        read cluster_name
 
-    echo -e "
-    +-------------------------------------------------------------------------+
-    |${MAGENTA}AKS Creating${ENDCOLOR}
-    +-------------------------------------------------------------------------+
-    "  
-    az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn
-    echo -e "
-    +-------------------------------------------------------------------------+
-    |${GREEN}AKS Created${ENDCOLOR}
-    |Resource Group: $resource_group || Cluster Name: $cluster_name
-    +-------------------------------------------------------------------------+
-    |$(aks_get_url)
-    +-------------------------------------------------------------------------+
-    "  
-    az aks get-credentials --resource-group $resource_group --name $cluster_name --overwrite-existing
+        echo -e "
+        +-------------------------------------------------------------------------+
+        |${MAGENTA}AKS Creating${ENDCOLOR}
+        +-------------------------------------------------------------------------+
+        "  
+        az aks create --resource-group $resource_group --name $cluster_name --node-count 1
+        echo -e "
+        +-------------------------------------------------------------------------+
+        |${GREEN}AKS Created${ENDCOLOR}
+        |Resource Group: $resource_group || Cluster Name: $cluster_name
+        +-------------------------------------------------------------------------+
+        "
+        az aks get-credentials --resource-group $resource_group --name $cluster_name --overwrite-existing
+        ;;
+    2)
+        # Create AKS cluster
+        echo "Enter Resource Group Name:"
+        read resource_group
+        echo "Enter Cluster Name:"
+        read cluster_name
+        echo "Enter Location:{centralus, eastus, eastus2, swedencentral}"
+        read location
+        echo "Enter Node Count:{1, 2, 3,...}"
+        read node_count
+        echo "Enter Network Plugin:{azure, kubenet, none}"
+        read network_plugin
+        echo "Enter Tier:{free, premium, standard}"
+        read tier
+        echo "Enter OS SKU:{AzureLinux, CBLMariner, Mariner, Ubuntu}"
+        read os_sku
+        echo "Enter Node VM Size:{Standard_B2s, standard_ds2_v2}"
+        read node_vm_size
+        echo "Enter Managed Identity (MSI) OR Service Princiapl Name (SPN):{msi, spn}"
+        read msi_or_spn
+
+        if [[ "$msi_or_spn" == "msi" ]]; then
+            msi_or_spn="--tags ManagedCluster:PhilipMelloScriptAutomation"
+        elif [[ "$msi_or_spn" == "spn" ]]; then
+            msi_or_spn="--service-principal --tags ServicePrincipal:PhilipMelloScriptAutomation"
+        else
+            echo "Invalid input. Please enter MSI or SPN."
+        fi
+
+        echo -e "
+        +-------------------------------------------------------------------------+
+        |${MAGENTA}AKS Creating${ENDCOLOR}
+        +-------------------------------------------------------------------------+
+        "  
+        az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn
+        echo -e "
+        +-------------------------------------------------------------------------+
+        |${GREEN}AKS Created${ENDCOLOR}
+        |Resource Group: $resource_group || Cluster Name: $cluster_name
+        +-------------------------------------------------------------------------+
+        |$(aks_get_url)
+        +-------------------------------------------------------------------------+
+        "  
+        az aks get-credentials --resource-group $resource_group --name $cluster_name --overwrite-existing
+        ;;
+    *)
+        echo "Invalid choice. Please select 1, 2 or 3."
+        ;;
+    esac
 }
 
 function delete_aks() {
@@ -488,12 +521,23 @@ function az_cli_tools(){
         # Microsoft Official Documentation: https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt
         echo -e "
         +-------------------------------------------------------------------------+
-        |${GREEN}Installing az-cli${ENDCOLOR}
+        |${MAGENTA}Installing az-cli${ENDCOLOR}
         +-------------------------------------------------------------------------+
         "
         curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+         echo -e "
+        +-------------------------------------------------------------------------+
+        |${GREEN}az-cli Installed${ENDCOLOR}
+        +-------------------------------------------------------------------------+
+        "
         ;;
     2)
+        # Install kubectl
+        echo -e "
+        +-------------------------------------------------------------------------+
+        |${MAGENTA}Installing kubectl${ENDCOLOR}
+        +-------------------------------------------------------------------------+
+        "
         ;;
     *)
          echo "Invalid choice. Please select 1 or 2."
@@ -582,8 +626,8 @@ fi
 
 echo "Choose an option:"
 echo "1. Create Resource Group"
-echo "2. Create AKS Default"
-echo "3. Create AKS with other options"
+echo "2. Create AKS"
+# echo "3. Create AKS with other options"
 echo "4. Delete AKS"
 echo "5. Reset Cluster Service Principal Credentials (SPN)"
 echo "6. Backup Pod Disruption Budget (PDB)"
@@ -603,7 +647,7 @@ case $option in
         az_create_resource_group
         ;;
     2)  
-        create_aks_default
+        aks_creation
         ;;
     3)
         create_aks
