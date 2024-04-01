@@ -529,6 +529,23 @@ function az_cli_tools(){
     esac
 }
 
+function az_vmss() {
+    # Az vmss
+    echo -e "
+    Microsoft Official Documentation: 
+    'https://learn.microsoft.com/en-us/cli/azure/vmss?view=azure-cli-latest#commands'
+    "
+    echo "Enter MC_Resource Group:"
+    read resource_group
+    echo "Enter Cluster Name:"
+    read cluster_name
+    echo "Enter VMSS ScaleSet Name"
+    read vmss_scaleset
+    echo "Enter VMSS ID"
+    read vmss_id
+    az vmss delete-instances --instance-ids $vmss_id --name $vmss_scaleset --resource-group $resource_group --no-wait --force-deletion
+}
+
 function cluster_analysis() {
     # AKS Cluster Analysis
     echo "Enter Resource Group:"
@@ -536,7 +553,7 @@ function cluster_analysis() {
     echo "Enter Cluster Name:"
     read cluster_name
 
-       echo -e "
+    echo -e "
     +-----------------------+
     |${MAGENTA}Analysing Cluster...${ENDCOLOR}   |
     +-----------------------+
@@ -668,6 +685,9 @@ case $option in
         ;;
     14)
         aks_enable_disable_addon
+        ;;
+    15)
+        az_vmss
         ;;
     99)
         cluster_analysis
