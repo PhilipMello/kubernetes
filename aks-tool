@@ -46,6 +46,7 @@ function az_resource_group() {
     echo "2. Delete Resource Group"
     echo "3. Force Delete Resource Group"
     echo "4. Check if a Resource Group exists"
+    read option
     case $option in
         1)
             echo "Create Resource Group"
@@ -57,32 +58,34 @@ function az_resource_group() {
             echo "Enter tag name, or hit enter to no tag"
             read tags
             az group create --name $resource_group --location $location --tags $tags
-        ;;
-
+            exit 110
+            ;;
         2)
             echo "Delete Resource Group"
             echo "Enter Resource Group Name:"
             read resource_group
             az group delete --name $resource_group
-        ;;
-
+            exit 120
+            ;;
         3)
             echo "Force Delete Resource Group"
             echo "Enter Resource Group Name:"
             read resource_group
             az group delete --name $resource_group --force-deletion-types Microsoft.Compute/virtualMachines
-        ;;
-
+            exit 130
+            ;;
         4)
             echo "Check if a Resource Group exists"
             echo "Enter Resource Group Name:"
             read resource_group
-            az group exists --name $resource_group 
-        ;;
-
+            az group exists --name $resource_group
+            if [ $? -eq 0 ]; then
+                exit 140
+            fi
+            ;;
         *)
             echo "Invalid option"
-        ;;
+            ;;
     esac
 }
 
@@ -758,7 +761,7 @@ echo "11. Get SysLog"
 echo "12. Get AKS Versions by location"
 echo "13. Upgrade AKS or Nodepool"
 echo "14. AKS Enable or Disable Addons"
-echo "99. Cluster Analysis (MSI, SPN, PDB, PowerState, Credentials,...)"
+echo "99. Cluster Analysis (Top Nodes, Top Pods, MSI, SPN, PDB, PowerState, Credentials, AKS URL...)"
 read option
 
 case $option in
