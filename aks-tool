@@ -443,11 +443,8 @@ function aks_get_pv_pvc() {
 
 function aks_enable_disable_addon() {
     # AKS Enable or Disable Addons
-    echo -e "Microsoft Official Documentation:
-    'https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-cluster-manage-backups'
-    "
     echo "1. Enable or Disable AKS Backup Extension"
-    echo "Enable or Disable Monitoring logs"
+    echo "2. Enable or Disable Monitoring logs"
     echo "Enter your option:"
     read option
 
