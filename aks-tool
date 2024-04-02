@@ -38,6 +38,21 @@ GREEN="\033[97;102m"
 RED="\033[97;41m"
 ENDCOLOR="\e[0m"
 
+function az_create_resource_group() {
+    # Create Resource Group
+    echo -e " Microsoft Official Documentation: 
+    'https://learn.microsoft.com/en-us/cli/azure/group?view=azure-cli-latest'
+    "
+    echo "Enter Resource Group Name:"
+    read resource_group
+    echo "To see locations run: az account list-locations -o table"
+    echo "Enter Resource Group location:"
+    read location
+    echo "Enter tag name, or hit enter to no tag"
+    read tags
+    az group create --name $resource_group --location $location --tags $tags
+}
+
 function aks_create() {
     # AKS Creation
     echo "1. Create AKS Default"
@@ -117,7 +132,7 @@ function aks_create() {
     esac
 }
 
-function delete_aks() {
+function aks_delete() {
     # Delete AKS cluster
     echo "Enter Resource Group:"
     read resource_group
@@ -183,7 +198,9 @@ function reset_spn_credentials() {
 
 function check_pdb() {
     # Check if the AKS cluster has a PDB
-    # Microsoft Official documentation: https://learn.microsoft.com/en-us/troubleshoot/azure/azure-kubernetes/error-code-poddrainfailure#symptoms
+    echo -e "Microsoft Official documentation:
+    'https://learn.microsoft.com/en-us/troubleshoot/azure/azure-kubernetes/error-code-poddrainfailure#symptoms'
+    "
     pdbCount=$(kubectl get pdb --all-namespaces | wc -l)
     pdbCount2=$(kubectl get pdb --all-namespaces | grep "0")
     command="kubectl get pdb --all-namespaces"
@@ -241,27 +258,6 @@ function check_disk_pressure_status() {
     fi
 }
 
-function enable_or_disable_monitoring_logs() {
-    # Enable or Disable Monitoring logs
-    # Microsoft Official documentation: https://learn.microsoft.com/en-us/azure/azure-monitor/containers/kubernetes-monitoring-disable
-    echo "Enter Resource Group:"
-    read resource_group
-    echo "Enter Cluster Name:"
-    read cluster_name
-    echo "Choose Option: (1 = Enable / 2 = Disable)"
-    read addons_option
-
-    if [[ "$addons_option" == "1" ]]; then
-        echo "Enabling Monitoring Logs"
-        az aks enable-addons -a monitoring --resource-group $resource_group --name $cluster_name
-    elif [[ "$addons_option" == "2" ]]; then
-        echo "Disabling Monitoring Logs"
-        az aks disable-addons -a monitoring --resource-group $resource_group --name $cluster_name
-    else
-        echo "Incorret Option"
-    fi
-}
-
 function check_acr_connection() {
     # Check ACR connection issues
     az acr list -o table
@@ -273,7 +269,9 @@ function check_acr_connection() {
 
 function aks_get_url() {
     # Get AKS URL Azure Portal
-    # Microsoft Official documentation: https://learn.microsoft.com/pt-pt/cli/azure/aks?view=azure-cli-latest#az-aks-browse
+    echo -e "Microsoft Official documentation: 
+    'https://learn.microsoft.com/pt-pt/cli/azure/aks?view=azure-cli-latest#az-aks-browse'
+    "
     aks_azure_link=$(az aks browse --resource-group $resource_group --name $cluster_name)
     echo "
     |$aks_azure_link"
@@ -307,7 +305,9 @@ function aks_check_top() {
 
 function aks_tcpdump() {
     # Get tcpdump
-    # https://github.com/josecaneira/aks-lab/tree/main/tcpdump_daemonset
+    echo -e "Documentation
+    'https://github.com/josecaneira/aks-lab/tree/main/tcpdump_daemonset'
+    "
 
     echo -e "
     +-------------------------------------------------------------------------+
@@ -353,20 +353,10 @@ function aks_information() {
 
 function aks_nodepool_information() {
     # Nodepoool information
-    # Microsoft Official documentation: https://learn.microsoft.com/en-US/cli/azure/aks/nodepool?view=azure-cli-latest#az_aks_nodepool_list
+    echo -e "Microsoft Official Documentation: 
+    'https://learn.microsoft.com/en-US/cli/azure/aks/nodepool?view=azure-cli-latest#az_aks_nodepool_list'
+    "
     az aks nodepool list $resource_group --name $cluster_name -o wide
-}
-
-function az_create_resource_group() {
-    # Create Resource Group
-    echo "Enter Resource Group Name:"
-    read resource_group
-    echo "To see locations run: az account list-locations -o table"
-    echo "Enter Resource Group location:"
-    read location
-    echo "Enter tag name, or hit enter to no tag"
-    read tags
-    az group create --name $resource_group --location $location --tags $tags
 }
 
 function aks_update_upgrade() {
@@ -423,8 +413,7 @@ function aks_enable_disable_addon() {
     echo -e "Microsoft Official Documentation:
     'https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-cluster-manage-backups'
     "
-    echo "1. Enable AKS Backup Extension"
-    echo "2. Disable AKS Backup Extension"
+    echo "1. Enable or Disable AKS Backup Extension"
     echo "Enter your option:"
     read option
 
@@ -434,56 +423,90 @@ function aks_enable_disable_addon() {
 
     case $option in
     1)
-        # Enable AKS Backup Extension
-        # Microsoft Official Documentation: https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-cluster-manage-backups
         echo "Enable AKS Backup Extension"
-        echo "Enter Resource Group:"
-        read resource_group
-        echo "Enter Cluster Name:"
-        read cluster_name
-        echo "Storage Account Name"
-        read storageaccount_name
-        echo "Blob Container Name"
-        read blobcontainer_name
-        echo "Storage Account Resource Group Name"
-        read storageaccount_resource_group_name
-        echo "Storage Account Subscription Id"
-        read storageaccountsubscriptionid
-        echo -e "
-        +-------------------------------------------------------------------------+
-        |${MAGENTA}Enabling AKS Backup Extension${ENDCOLOR}
-        +-------------------------------------------------------------------------+
+        echo -e "Microsoft Official Documentation: 
+        'https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-cluster-manage-backups'
         "
-        echo -e "The registration may take up to 10 minutes. To monitor the registration process, wait the status to show:
-        Registered.
-        "
-        az provider register --namespace Microsoft.KubernetesConfiguration
-        watch az provider show -n Microsoft.KubernetesConfiguration -o table
-        pause_function
-        az extension add --name aks-preview
-        az extension update --name aks-preview
-        echo -e "It takes a few minutes for the status to show Registered."
-        az feature register --namespace "Microsoft.ContainerService" --name "TrustedAccessPreview"
-        watch az feature show --namespace "Microsoft.ContainerService" --name "TrustedAccessPreview"
-        pause_function
-        az provider register --namespace Microsoft.ContainerService
-        az k8s-extension create --name azure-aks-backup --extension-type microsoft.dataprotection.kubernetes --scope cluster --cluster-type managedClusters --cluster-name $cluster_name --resource-group $resource_group --release-train stable --configuration-settings blobContainer=$blobcontainer_name storageAccount=$storageaccount_name storageAccountResourceGroup=$storageaccount_resource_group_name storageAccountSubscriptionId=$storageaccountsubscriptionid
+        echo "Choose Option: (1 = Enable / 2 = Disable)"
+        read addons_option
+
+        if [[ "$addons_option" == "1" ]]; then
+            echo "Enable AKS Backup Extension"
+            echo "Enter Resource Group:"
+            read resource_group
+            echo "Enter Cluster Name:"
+            read cluster_name
+            echo "Storage Account Name"
+            read storageaccount_name
+            echo "Blob Container Name"
+            read blobcontainer_name
+            echo "Storage Account Resource Group Name"
+            read storageaccount_resource_group_name
+            echo "Storage Account Subscription Id"
+            read storageaccountsubscriptionid
+            echo -e "
+            +-------------------------------------------------------------------------+
+            |${MAGENTA}Enabling AKS Backup Extension${ENDCOLOR}
+            +-------------------------------------------------------------------------+
+            "
+            echo -e "The registration may take up to 10 minutes. To monitor the registration process, wait the status to show:
+            Registered.
+            "
+            echo "Enabling Monitoring Logs"
+            az provider register --namespace Microsoft.KubernetesConfiguration
+            watch az provider show -n Microsoft.KubernetesConfiguration -o table
+            pause_function
+            az extension add --name aks-preview
+            az extension update --name aks-preview
+            echo -e "It takes a few minutes for the status to show Registered."
+            az feature register --namespace "Microsoft.ContainerService" --name "TrustedAccessPreview"
+            watch az feature show --namespace "Microsoft.ContainerService" --name "TrustedAccessPreview"
+            pause_function
+            az provider register --namespace Microsoft.ContainerService
+            az k8s-extension create --name azure-aks-backup --extension-type microsoft.dataprotection.kubernetes --scope cluster --cluster-type managedClusters --cluster-name $cluster_name --resource-group $resource_group --release-train stable --configuration-settings blobContainer=$blobcontainer_name storageAccount=$storageaccount_name storageAccountResourceGroup=$storageaccount_resource_group_name storageAccountSubscriptionId=$storageaccountsubscriptionid
+        elif [[ "$addons_option" == "2" ]]; then
+            echo "Disable AKS Backup Extension"
+            echo -e "Microsoft Official Documentation:
+            'https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-cluster-manage-backups'
+            "
+            echo "Disable AKS Backup Extension"
+            echo "Enter Resource Group:"
+            read resource_group
+            echo "Enter Cluster Name:"
+            read cluster_name
+
+            echo -e "
+            +-------------------------------------------------------------------------+
+            |${RED}Disabling AKS Backup Extension${ENDCOLOR}
+            +-------------------------------------------------------------------------+
+            "
+            az k8s-extension delete --resource-group $resource_group --cluster-name $cluster_name --cluster-type managedClusters --name azure-aks-backup
+            ;;
+        else
+            echo "Incorret Option"
+        fi
         ;;
     2)
-        # Disable AKS Backup Extension
-        # Microsoft Official Documentation: https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-cluster-manage-backups
-        echo "Disable AKS Backup Extension"
+        echo "Enable or Disable Monitoring logs"
+        echo -e "Microsoft Official documentation: 
+        'https://learn.microsoft.com/en-us/azure/azure-monitor/containers/kubernetes-monitoring-disable'
+        "
         echo "Enter Resource Group:"
         read resource_group
         echo "Enter Cluster Name:"
         read cluster_name
+        echo "Choose Option: (1 = Enable / 2 = Disable)"
+        read addons_option
 
-         echo -e "
-        +-------------------------------------------------------------------------+
-        |${RED}Disabling AKS Backup Extension${ENDCOLOR}
-        +-------------------------------------------------------------------------+
-        "
-        az k8s-extension delete --resource-group $resource_group --cluster-name $cluster_name --cluster-type managedClusters --name azure-aks-backup
+        if [[ "$addons_option" == "1" ]]; then
+            echo "Enabling Monitoring Logs"
+            az aks enable-addons -a monitoring --resource-group $resource_group --name $cluster_name
+        elif [[ "$addons_option" == "2" ]]; then
+            echo "Disabling Monitoring Logs"
+            az aks disable-addons -a monitoring --resource-group $resource_group --name $cluster_name
+        else
+            echo "Incorret Option"
+        fi
         ;;
     *)
         echo "Invalid choice. Please select 1 or 2."
@@ -613,10 +636,10 @@ function cluster_on_off() {
 # Manual
 manual() {
     echo -e "Get AKS Credentials: 'https://docs.microsoft.com/en-US/cli/azure/aks#az_aks_get_credentials'"
-    echo -e "Option 1, create AKS cluster with default option in Azure (FAST)"
-    echo -e "Option 2, create a cluster by passing the parameters:
-    --location --node-count --network-plugin --tier --os-sku --node-vm-size $msi_or_spn
-"
+    echo -e "Option 3, Enable or Disable Addons
+    'https://learn.microsoft.com/en-us/cli/azure/vmss?view=azure-cli-latest#commands'
+    "
+
 exit 0
 }
 
@@ -654,7 +677,7 @@ case $option in
         az_cli_tools
         ;;
     4)
-        delete_aks
+        aks_delete
         ;;
     5)
         reset_spn_credentials
