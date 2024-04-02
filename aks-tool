@@ -445,6 +445,7 @@ function aks_enable_disable_addon() {
     # AKS Enable or Disable Addons
     echo "1. Enable or Disable AKS Backup Extension"
     echo "2. Enable or Disable Monitoring logs"
+    echo "3. Enable or Disable open-service-mesh addon"
     echo "Enter your option:"
     read option
 
@@ -497,9 +498,6 @@ function aks_enable_disable_addon() {
             az k8s-extension create --name azure-aks-backup --extension-type microsoft.dataprotection.kubernetes --scope cluster --cluster-type managedClusters --cluster-name $cluster_name --resource-group $resource_group --release-train stable --configuration-settings blobContainer=$blobcontainer_name storageAccount=$storageaccount_name storageAccountResourceGroup=$storageaccount_resource_group_name storageAccountSubscriptionId=$storageaccountsubscriptionid
         elif [[ "$addons_option" == "2" ]]; then
             echo "Disable AKS Backup Extension"
-            echo -e "Microsoft Official Documentation:
-            'https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-cluster-manage-backups'
-            "
             echo "Disable AKS Backup Extension"
             echo "Enter Resource Group:"
             read resource_group
@@ -521,19 +519,56 @@ function aks_enable_disable_addon() {
         echo -e "Microsoft Official documentation: 
         'https://learn.microsoft.com/en-us/azure/azure-monitor/containers/kubernetes-monitoring-disable'
         "
+        echo "Choose Option: (1 = Enable / 2 = Disable)"
+        read addons_option
         echo "Enter Resource Group:"
         read resource_group
         echo "Enter Cluster Name:"
         read cluster_name
-        echo "Choose Option: (1 = Enable / 2 = Disable)"
-        read addons_option
 
         if [[ "$addons_option" == "1" ]]; then
-            echo "Enabling Monitoring Logs"
+            echo -e "
+            +-------------------------------------------------------------------------+
+            |${MAGENTA}Enabling AKS Monitoring Logs${ENDCOLOR}
+            +-------------------------------------------------------------------------+
+            "
             az aks enable-addons -a monitoring --resource-group $resource_group --name $cluster_name
         elif [[ "$addons_option" == "2" ]]; then
-            echo "Disabling Monitoring Logs"
+            echo -e "
+            +-------------------------------------------------------------------------+
+            |${RED}Disabling AKS Monitoring Logs${ENDCOLOR}
+            +-------------------------------------------------------------------------+
+            "
             az aks disable-addons -a monitoring --resource-group $resource_group --name $cluster_name
+        else
+            echo "Incorret Option"
+        fi
+        ;;
+    3)
+        echo "Enable or Disable open-service-mesh addon"
+        echo -e "Microsoft Official documentation: 
+        'https://learn.microsoft.com/en-us/cli/azure/aks?view=azure-cli-latest#az-aks-enable-addons(aks-preview)'
+        "
+        echo "Choose Option: (1 = Enable / 2 = Disable)"
+        read addons_option
+        echo "Enter Resource Group:"
+        read resource_group
+        echo "Enter Cluster Name:"
+        read cluster_name
+        if [[ "$addons_option" == "1" ]]; then
+            echo -e "
+            +-------------------------------------------------------------------------+
+            |${MAGENTA}Enabling AKS open-service-mesh addon${ENDCOLOR}
+            +-------------------------------------------------------------------------+
+            "
+            az aks enable-addons --resource-group $resource_group --name $cluster_name --addons open-service-mesh
+        elif [[ "$addons_option" == "2" ]]; then
+            echo -e "
+            +-------------------------------------------------------------------------+
+            |${RED}Disabling AKS open-service-mesh addon${ENDCOLOR}
+            +-------------------------------------------------------------------------+
+            "
+            az aks disable-addons --resource-group $resource_group --name $cluster_name --addons open-service-mesh
         else
             echo "Incorret Option"
         fi
@@ -546,10 +581,14 @@ function aks_enable_disable_addon() {
 
 function az_cli_tools(){
     # Az Cli Tools
+    echo "1. Install az-cli"
+    echo "2. Install kubectl"
     case $option in
     1)
-        # Install az-cli
-        # Microsoft Official Documentation: https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt
+        echo "Install az-cli"
+        echo -e "Microsoft Official Documentation: 
+        'https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt'
+        "
         echo -e "
         +-------------------------------------------------------------------------+
         |${MAGENTA}Installing az-cli${ENDCOLOR}
@@ -563,7 +602,10 @@ function az_cli_tools(){
         "
         ;;
     2)
-        # Install kubectl
+        echo -e "Microsoft Official Documentation: 
+        'https://learn.microsoft.com/en-us/cli/azure/aks?view=azure-cli-latest#az-aks-install-cli'
+        "
+        echo "Install kubectl"
         echo -e "
         +-------------------------------------------------------------------------+
         |${MAGENTA}Installing kubectl${ENDCOLOR}
@@ -583,20 +625,43 @@ function az_cli_tools(){
 }
 
 function az_vmss() {
-    # Az vmss
+    echo "Enter your option:"
+    read option
+    echo "1. vmss delete-instances"
+    echo "2. vmss deallocate"
     echo -e "
     Microsoft Official Documentation: 
     'https://learn.microsoft.com/en-us/cli/azure/vmss?view=azure-cli-latest#commands'
     "
-    echo "Enter MC_Resource Group:"
-    read resource_group
-    echo "Enter Cluster Name:"
-    read cluster_name
-    echo "Enter VMSS ScaleSet Name"
-    read vmss_scaleset
-    echo "Enter VMSS ID"
-    read vmss_id
-    az vmss delete-instances --instance-ids $vmss_id --name $vmss_scaleset --resource-group $resource_group --no-wait --force-deletion
+    case $option in
+    1)
+        echo "Az vmss delete-instances"
+        echo "Enter MC_Resource Group:"
+        read resource_group
+        echo "Enter Cluster Name:"
+        read cluster_name
+        echo "Enter VMSS ScaleSet Name"
+        read vmss_scaleset
+        echo "Enter VMSS ID"
+        read vmss_id
+        az vmss delete-instances --instance-ids $vmss_id --name $vmss_scaleset --resource-group $resource_group --no-wait --force-deletion
+        ;;
+    2)
+        echo "Az vmss deallocate"
+        echo "Enter MC_Resource Group:"
+        read resource_group
+        echo "Enter Cluster Name:"
+        read cluster_name
+        echo "Enter VMSS ScaleSet Name"
+        read vmss_scaleset
+        echo "Enter VMSS ID"
+        read vmss_id
+        az vmss deallocate --instance-ids $vmss_id --name $vmss_scaleset --resource-group $resource_group
+        ;;
+    *)
+         echo "Invalid choice. Please select 1 or 2."
+        ;;
+    esac
 }
 
 function cluster_analysis() {
