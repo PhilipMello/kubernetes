@@ -462,7 +462,7 @@ function aks_enable_disable_addon() {
         echo -e "Microsoft Official Documentation: 
         'https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-cluster-manage-backups'
         "
-        echo "Choose Option: (1 = Enable / 2 = Disable)"
+        echo "Choose Option: (1 = Enable / 2 = Disable / 3 = Troubleshoot)"
         read addons_option
 
         if [[ "$addons_option" == "1" ]]; then
@@ -513,6 +513,30 @@ function aks_enable_disable_addon() {
             +-------------------------------------------------------------------------+
             "
             az k8s-extension delete --resource-group $resource_group --cluster-name $cluster_name --cluster-type managedClusters --name azure-aks-backup
+        elif [[ "$addons_option" == "3" ]]; then
+        echo  -e "
+        Troubleshoot Azure Kubernetes Service backup and restore
+
+        Scenario 1
+        Error message:
+        ${RED}{Helm installation from path [] for release [azure-aks-backup] failed with the following error: err [release azure-aks-backup failed, and has been uninstalled due to atomic being set: failed post-install: timed out waiting for the condition]} occurred while doing the operation: {Installing the extension} on the config${ENDCOLOR}
+        
+        Cause: The extension has been installed successfully, but the pods aren't spawning. 
+        This happens because the required compute and memory aren't available for the pods.
+
+        Resolution: To resolve the issue, increase the number of nodes in the cluster. 
+        This allows sufficient compute and memory to be available for the pods to spawn. 
+        To scale node pool on Azure portal, follow these steps:
+            ${GREEN}
+            1.On the Azure portal, open the AKS cluster.
+            2.Go to Node pools under Settings.
+            3.Select Scale node pool, and then update the minimum and maximum values on the Node count range.
+            4.Select Apply.
+            5.AKS Backup Extension installation error resolutions${ENDCOLOR}
+
+            Other Scenarios go to:
+        'https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-backup-troubleshoot'
+        "
         else
             echo "Incorret Option"
         fi
@@ -734,7 +758,7 @@ function cluster_on_off() {
 # Manual
 manual() {
     echo -e "Get AKS Credentials: 'https://docs.microsoft.com/en-US/cli/azure/aks#az_aks_get_credentials'"
-    echo -e "Option 3, Enable or Disable Addons
+    echo -e "
     'https://learn.microsoft.com/en-us/cli/azure/vmss?view=azure-cli-latest#commands'
     "
 
@@ -761,6 +785,7 @@ echo "11. Get SysLog"
 echo "12. Get AKS Versions by location"
 echo "13. Upgrade AKS or Nodepool"
 echo "14. AKS Enable or Disable Addons"
+echo "15. Az vmss"
 echo "99. Cluster Analysis (Top Nodes, Top Pods, MSI, SPN, PDB, PowerState, Credentials, AKS URL...)"
 read option
 
