@@ -515,7 +515,6 @@ function aks_enable_disable_addon() {
             +-------------------------------------------------------------------------+
             "
             az k8s-extension delete --resource-group $resource_group --cluster-name $cluster_name --cluster-type managedClusters --name azure-aks-backup
-            ;;
         else
             echo "Incorret Option"
         fi
