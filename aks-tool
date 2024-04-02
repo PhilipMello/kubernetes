@@ -38,19 +38,52 @@ GREEN="\033[97;102m"
 RED="\033[97;41m"
 ENDCOLOR="\e[0m"
 
-function az_create_resource_group() {
-    # Create Resource Group
+function az_resource_group() {
     echo -e " Microsoft Official Documentation: 
     'https://learn.microsoft.com/en-us/cli/azure/group?view=azure-cli-latest'
     "
-    echo "Enter Resource Group Name:"
-    read resource_group
-    echo "To see locations run: az account list-locations -o table"
-    echo "Enter Resource Group location:"
-    read location
-    echo "Enter tag name, or hit enter to no tag"
-    read tags
-    az group create --name $resource_group --location $location --tags $tags
+    echo "1. Create Resource Group"
+    echo "2. Delete Resource Group"
+    echo "3. Force Delete Resource Group"
+    echo "4. Check if a Resource Group exists"
+    case $option in
+        1)
+            echo "Create Resource Group"
+            echo "Enter Resource Group Name:"
+            read resource_group
+            echo "To see locations run: az account list-locations -o table"
+            echo "Enter Resource Group location:"
+            read location
+            echo "Enter tag name, or hit enter to no tag"
+            read tags
+            az group create --name $resource_group --location $location --tags $tags
+        ;;
+
+        2)
+            echo "Delete Resource Group"
+            echo "Enter Resource Group Name:"
+            read resource_group
+            az group delete --name $resource_group
+        ;;
+
+        3)
+            echo "Force Delete Resource Group"
+            echo "Enter Resource Group Name:"
+            read resource_group
+            az group delete --name $resource_group --force-deletion-types Microsoft.Compute/virtualMachines
+        ;;
+
+        4)
+            echo "Check if a Resource Group exists"
+            echo "Enter Resource Group Name:"
+            read resource_group
+            az group exists --name $resource_group 
+        ;;
+
+        *)
+            echo "Invalid option"
+        ;;
+    esac
 }
 
 function aks_create() {
@@ -414,6 +447,7 @@ function aks_enable_disable_addon() {
     'https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-cluster-manage-backups'
     "
     echo "1. Enable or Disable AKS Backup Extension"
+    echo "Enable or Disable Monitoring logs"
     echo "Enter your option:"
     read option
 
@@ -649,7 +683,7 @@ if [[ $1 == "-h" || $1 == "--help" || "$1" == "--h" ]]; then
 fi
 
 echo "Choose an option:"
-echo "1. Create Resource Group"
+echo "1. Create or Delete Resource Group"
 echo "2. Create AKS"
 echo "3. Az Tools (Install az-cli OR kubectl)"
 echo "4. Delete AKS"
@@ -668,7 +702,7 @@ read option
 
 case $option in
     1)
-        az_create_resource_group
+        az_resource_group
         ;;
     2)  
         aks_create
