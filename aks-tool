@@ -543,7 +543,8 @@ function aks_enable_disable_addon() {
         ;;
     2)
         echo "Enable or Disable Monitoring logs"
-        echo -e "Microsoft Official documentation: 
+        echo -e "Microsoft Official Documentation:
+        'https://learn.microsoft.com/en-us/azure/azure-monitor/containers/kubernetes-monitoring-enable'
         'https://learn.microsoft.com/en-us/azure/azure-monitor/containers/kubernetes-monitoring-disable'
         "
         echo "Choose Option: (1 = Enable / 2 = Disable)"
