@@ -466,6 +466,13 @@ function aks_enable_disable_addon() {
         read addons_option
 
         if [[ "$addons_option" == "1" ]]; then
+        azurepolicy_check=$(kubectl get events -A | grep "azurepolicy-k8sazurev2containerallowedimag")
+            if [[ $azurepolicy_check == *"azurepolicy-k8sazurev2containerallowedimag"* ]]; then
+                echo -e "The policy:azurepolicy-k8sazurev2containerallowedimag
+                is affecting the AKS Backup Addon Installation
+                "
+            exit 1
+            fi
             echo "Enable AKS Backup Extension"
             echo "Enter Resource Group:"
             read resource_group
@@ -484,14 +491,6 @@ function aks_enable_disable_addon() {
             |${MAGENTA}Enabling AKS Backup Extension${ENDCOLOR}
             +-------------------------------------------------------------------------+
             "
-            azurepolicy_check=$(kubectl get events -A | grep "azurepolicy-k8sazurev2containerallowedimag")
-            if [[ $azurepolicy_check == *"azurepolicy-k8sazurev2containerallowedimag"* ]]; then
-                echo -e "The policy:azurepolicy-k8sazurev2containerallowedimag
-                is affecting the AKS Backup Addon Installation
-                "
-            exit 1
-            fi
-
             echo -e " ${YELLOW}
             The registration may take up to 10 minutes. To monitor the registration process, wait the status to show:
             Registered.${ENDCOLOR}"
