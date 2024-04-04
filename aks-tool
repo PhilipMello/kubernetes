@@ -468,9 +468,12 @@ function aks_enable_disable_addon() {
         if [[ "$addons_option" == "1" ]]; then
         azurepolicy_check=$(kubectl get events -A | grep "azurepolicy-k8sazurev2containerallowedimag")
             if [[ $azurepolicy_check == *"azurepolicy-k8sazurev2containerallowedimag"* ]]; then
-                echo -e "The policy:azurepolicy-k8sazurev2containerallowedimag
-                is affecting the AKS Backup Addon Installation
-                "
+            echo -e "
+            +-------------------------------------------------------------------------+
+            |${RED}The policy:azurepolicy-k8sazurev2containerallowedimag
+            |is affecting the AKS Backup Addon Installation${ENDCOLOR}
+            +-------------------------------------------------------------------------+
+            "
             exit 1
             fi
             echo "Enable AKS Backup Extension"
@@ -540,6 +543,19 @@ function aks_enable_disable_addon() {
             3.Select Scale node pool, and then update the minimum and maximum values on the Node count range.
             4.Select Apply.
             5.AKS Backup Extension installation error resolutions${ENDCOLOR}
+
+        ---
+        Scenario 4
+        Error message:
+        ${RED}dataprotection-microsoft 4m1s Warning   FailedCreate   job/dataprotection-microsoft-kubernetes-agent-upgrade-crds   Error creating: admission webhook "validation.gatekeeper.sh"
+        denied the request: [azurepolicy-k8sazurev2containerallowedimag-3a4821c975f10fdc4e71] 
+        Container image mcr.microsoft.com/azurebackup/k8s/velero:0.0.02574.247 for container velero has not been allowed....${ENDCOLOR}
+
+        Resolution: Edit policy in Azure Portal.
+        Go to: Home > Policy > Assignments > Kubernetes cluster containers should only use allowed images
+        change to allow in: Parameters
+        This policy can be found in:
+        'https://learn.microsoft.com/en-us/azure/aks/policy-reference'
 
             Other Scenarios go to:
         'https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-backup-troubleshoot'
