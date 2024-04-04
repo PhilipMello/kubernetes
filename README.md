@@ -10,7 +10,6 @@
 
 <!--START-->
 <a class="github-button" href="https://github.com/PhilipMello/kubernetes/fork" data-color-scheme="no-preference: light; light: light; dark: dark;" data-icon="octicon-repo-forked" data-size="large" aria-label="Fork PhilipMello/kubernetes on GitHub">Fork</a>
-<script async defer src="https://buttons.github.io/buttons.js"></script>
 <!--END-->
 
 # 📝 About
