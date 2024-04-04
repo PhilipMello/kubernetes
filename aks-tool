@@ -484,18 +484,18 @@ function aks_enable_disable_addon() {
             |${MAGENTA}Enabling AKS Backup Extension${ENDCOLOR}
             +-------------------------------------------------------------------------+
             "
-            echo -e "The registration may take up to 10 minutes. To monitor the registration process, wait the status to show:
-            Registered.
-            "
-            echo "Enabling Monitoring Logs"
+            echo -e " ${YELLOW}
+            The registration may take up to 10 minutes. To monitor the registration process, wait the status to show:
+            Registered.${ENDCOLOR}"
+            kubectl config set-context --current --namespace=default
             az provider register --namespace Microsoft.KubernetesConfiguration
-            watch az provider show -n Microsoft.KubernetesConfiguration -o table
+            watch -g az provider show -n Microsoft.KubernetesConfiguration -o table
             pause_function
             az extension add --name aks-preview
             az extension update --name aks-preview
             echo -e "It takes a few minutes for the status to show Registered."
             az feature register --namespace "Microsoft.ContainerService" --name "TrustedAccessPreview"
-            watch az feature show --namespace "Microsoft.ContainerService" --name "TrustedAccessPreview"
+            watch -g az feature show --namespace "Microsoft.ContainerService" --name "TrustedAccessPreview"
             pause_function
             az provider register --namespace Microsoft.ContainerService
             az k8s-extension create --name azure-aks-backup --extension-type microsoft.dataprotection.kubernetes --scope cluster --cluster-type managedClusters --cluster-name $cluster_name --resource-group $resource_group --release-train stable --configuration-settings blobContainer=$blobcontainer_name storageAccount=$storageaccount_name storageAccountResourceGroup=$storageaccount_resource_group_name storageAccountSubscriptionId=$storageaccountsubscriptionid
