@@ -552,10 +552,14 @@ function aks_enable_disable_addon() {
         Container image mcr.microsoft.com/azurebackup/k8s/velero:0.0.02574.247 for container velero has not been allowed....${ENDCOLOR}
 
         Resolution: Edit policy in Azure Portal.
+
         Go to: Home > Policy > Assignments > Kubernetes cluster containers should only use allowed images
         change to allow in: Parameters
         This policy can be found in:
         'https://learn.microsoft.com/en-us/azure/aks/policy-reference'
+
+        1. To check logs of the *ExtensionAgent* pod, run the following command:
+        kubectl get events -A
 
             Other Scenarios go to:
         'https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-backup-troubleshoot'
