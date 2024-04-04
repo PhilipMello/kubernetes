@@ -1,5 +1,18 @@
 # <p align="center">🔧 Azure Kubernetes Tools (AKS)</p>
 
+<!--START-->
+<a class="github-button" href="https://github.com/PhilipMello" data-color-scheme="no-preference: light; light: light; dark: dark;" data-size="large" aria-label="Follow @PhilipMello on GitHub">Follow @PhilipMello</a>
+<!--END-->
+
+<!--START-->
+<a class="github-button" href="https://github.com/PhilipMello/kubernetes/subscription" data-color-scheme="no-preference: light; light: light; dark: dark;" data-icon="octicon-eye" data-size="large" aria-label="Watch PhilipMello/kubernetes on GitHub">Watch</a>
+<!--END-->
+
+<!--START-->
+<a class="github-button" href="https://github.com/PhilipMello/kubernetes/fork" data-color-scheme="no-preference: light; light: light; dark: dark;" data-icon="octicon-repo-forked" data-size="large" aria-label="Fork PhilipMello/kubernetes on GitHub">Fork</a>
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+<!--END-->
+
 # 📝 About
 ## Free tools for Kubernetes (k8s)
 
