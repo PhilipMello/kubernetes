@@ -699,7 +699,7 @@ function az_vmss() {
         read vmss_scaleset
         echo "Enter VMSS ID"
         read vmss_id
-        az vmss delete-instances --instance-ids $vmss_id --name $vmss_scaleset --resource-group $resource_group --no-wait --force-deletion
+        az vmss delete-instances --instance-ids $vmss_id --name $vmss_scaleset --resource-group $resource_group --no-wait
         ;;
     2)
         echo "Az vmss deallocate"
