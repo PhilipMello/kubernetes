@@ -330,6 +330,8 @@ function aks_describe_nodes() {
 
 function aks_check_top() {
     # Get Pod, Node Logs
+    kubectl top nodes --sort-by=memory
+    kubectl top pods --sort-by=memory -A
     folderlogs=aks-top-logs
     mkdir $folderlogs
     kubectl top nodes --sort-by=memory > $folderlogs/topNodes.txt
@@ -805,15 +807,14 @@ echo "3. Az Tools (Install az-cli OR kubectl)"
 echo "4. Delete AKS"
 echo "5. Reset Cluster Service Principal Credentials (SPN)"
 echo "6. Backup Pod Disruption Budget (PDB)"
-echo "7. Enable or Disable Monitoring Logs"
-echo "8. Check ACR Connection"
-echo "9. Check Top (Pods and Nodes)"
-echo "10. Get TCPDUMP"
-echo "11. Get SysLog"
-echo "12. Get AKS Versions by location"
-echo "13. Upgrade AKS or Nodepool"
-echo "14. AKS Enable or Disable Addons"
-echo "15. Az vmss"
+echo "7. Check ACR Connection"
+echo "8. Check Top (Pods and Nodes)"
+echo "9. Get TCPDUMP"
+echo "10. Get SysLog"
+echo "11. Get AKS Versions by location"
+echo "12. Upgrade AKS or Nodepool"
+echo "13. AKS Enable or Disable Addons"
+echo "14. Az vmss"
 echo "99. Cluster Analysis (Top Nodes, Top Pods, MSI, SPN, PDB, PowerState, Credentials, AKS URL...)"
 read option
 
@@ -837,30 +838,27 @@ case $option in
         backup_pdb
         ;;
     7)
-        enable_or_disable_monitoring_logs
-        ;;
-    8)
         check_acr_connection
         ;;
-    9) 
+    8) 
         aks_check_top
         ;;
-    10)
+    9)
         aks_tcpdump
         ;;
-    11) 
+    10) 
         aks_get_syslog
         ;;
-    12)
+    11)
         aks_version_list_location
         ;;
-    13) 
+    12) 
         aks_update_upgrade
         ;;
-    14)
+    13)
         aks_enable_disable_addon
         ;;
-    15)
+    14)
         az_vmss
         ;;
     99)
