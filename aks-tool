@@ -680,10 +680,10 @@ function az_cli_tools(){
 }
 
 function az_vmss() {
-    echo "Enter your option:"
-    read option
     echo "1. vmss delete-instances"
     echo "2. vmss deallocate"
+    echo "Enter your option:"
+    read option
     echo -e "
     Microsoft Official Documentation: 
     'https://learn.microsoft.com/en-us/cli/azure/vmss?view=azure-cli-latest#commands'
