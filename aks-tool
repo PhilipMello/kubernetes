@@ -305,12 +305,13 @@ function check_acr_connection() {
 
 function aks_get_url() {
     # Get AKS URL Azure Portal
-    echo -e "Microsoft Official documentation: 
-    'https://learn.microsoft.com/pt-pt/cli/azure/aks?view=azure-cli-latest#az-aks-browse'
-    "
     aks_azure_link=$(az aks browse --resource-group $resource_group --name $cluster_name)
-    echo "
-    |$aks_azure_link"
+    echo "Microsoft Official documentation: 
+    |'https://learn.microsoft.com/pt-pt/cli/azure/aks?view=azure-cli-latest#az-aks-browse'
+    +-------------------------------------------------------------------------+
+    |Go to Azure Portal to start your AKS:
+    |$aks_azure_link
+    "
 }
 
 function aks_get_top_nodes() {
@@ -640,6 +641,7 @@ function az_cli_tools(){
     # Az Cli Tools
     echo "1. Install az-cli"
     echo "2. Install kubectl"
+    echo "3. Install helm"
     case $option in
     1)
         echo "Install az-cli"
@@ -675,8 +677,28 @@ function az_cli_tools(){
         +-------------------------------------------------------------------------+
         "
         ;;
+    3)
+        echo -e "Helm Official Documentation: 
+        'https://helm.sh/docs/intro/install/'
+        'https://github.com/helm/helm/releases'
+        "
+        echo "Install helm"
+        echo -e "
+        +-------------------------------------------------------------------------+
+        |${MAGENTA}Installing helm${ENDCOLOR}
+        +-------------------------------------------------------------------------+
+        "
+        wget https://get.helm.sh/helm-v3.14.3-linux-amd64.tar.gz
+        tar -zxvf helm-v3.14.3-linux-amd64.tar.gz
+        sudo mv linux-amd64/helm /usr/local/bin/helm
+        echo -e "
+        +-------------------------------------------------------------------------+
+        |${GREEN}helm Installed${ENDCOLOR}
+        +-------------------------------------------------------------------------+
+        "
+        ;;
     *)
-         echo "Invalid choice. Please select 1 or 2."
+         echo "Invalid choice. Please select 1, 2 or 3."
         ;;
     esac
 }
@@ -768,6 +790,9 @@ function cluster_on_off() {
     +---------------------------------------------------------+
     |Configmap:
     |$(aks_get_configmap)
+    +---------------------------------------------------------+
+    |ADDONS:
+    |$(az_aks_addon_check)
     "
     else
         echo -e "
@@ -780,11 +805,7 @@ function cluster_on_off() {
     +-------------------------------------------------------------------------+
     |Run: az aks start --resource-group $resource_group --name $cluster_name
     +-------------------------------------------------------------------------+
-    | or go to Azure Portal to Start
-    +-------------------------------------------------------------------------+
     |$(aks_get_url)
-    |
-    |
     +-------------------------------------------------------------------------+
     "
     fi
