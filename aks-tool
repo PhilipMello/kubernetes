@@ -721,6 +721,15 @@ function az_vmss() {
     esac
 }
 
+function az_aks_addon_check() {
+    # Check AKS Addons Installed
+    echo "Enter Resource Group:"
+    read resource_group
+    echo "Enter Cluster Name:"
+    read cluster_name
+    az aks addon list --resource-group $resource_group --name $cluster_name -o table
+}
+
 function cluster_analysis() {
     # AKS Cluster Analysis
     echo "Enter Resource Group:"
