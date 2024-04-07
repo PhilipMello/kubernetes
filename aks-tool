@@ -642,9 +642,9 @@ function az_cli_tools(){
     echo "1. Install az-cli"
     echo "2. Install kubectl"
     echo "3. Install helm"
+    read option
     case $option in
     1)
-        echo "Install az-cli"
         echo -e "Microsoft Official Documentation: 
         'https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt'
         "
@@ -664,7 +664,6 @@ function az_cli_tools(){
         echo -e "Microsoft Official Documentation: 
         'https://learn.microsoft.com/en-us/cli/azure/aks?view=azure-cli-latest#az-aks-install-cli'
         "
-        echo "Install kubectl"
         echo -e "
         +-------------------------------------------------------------------------+
         |${MAGENTA}Installing kubectl${ENDCOLOR}
@@ -745,11 +744,8 @@ function az_vmss() {
 
 function az_aks_addon_check() {
     # Check AKS Addons Installed
-    echo "Enter Resource Group:"
-    read resource_group
-    echo "Enter Cluster Name:"
-    read cluster_name
-    az aks addon list --resource-group $resource_group --name $cluster_name -o table
+    az_aks_addon_check_cmd=$(az aks addon list --resource-group $resource_group --name $cluster_name -o table)
+    echo "$az_aks_addon_check_cmd"
 }
 
 function cluster_analysis() {
@@ -764,7 +760,7 @@ function cluster_analysis() {
     |${MAGENTA}Analysing Cluster...${ENDCOLOR}   |
     +-----------------------+
     "
-
+    
 function cluster_on_off() {
     power_state=$(az aks show --resource-group $resource_group --name $cluster_name --query powerState -o tsv)
     if [[ "$power_state" != "Stopped" ]]; then
