@@ -391,13 +391,39 @@ function aks_get_configmap() {
     kubectl get configmap -A
 }
 
-function aks_information() {
-    # AKS insights
-    az aks show --resource-group $resource_group --name $cluster_name --query linuxProfile.adminUsername -o tsv
-    az aks show --resource-group $resource_group --name $cluster_name --query linuxProfile.ssh.publicKeys[0].keyData -o tsv
-    az aks show --resource-group $resource_group --name $cluster_name --query location -o tsv
-    az aks show --resource-group $resource_group --name $cluster_name --query sku.tier -o tsv
-    az aks show --resource-group $resource_group --name $cluster_name --query nodeProvisioningProfile -o tsv
+function az_aks_information() {
+    # AKS Information
+    echo "1. Check Policies"
+    echo "Enter your option:"
+    read option
+
+    case $option in
+        1)
+            echo "1. Check Policies by Resource Group"
+            echo "2. Check Policies by Subscription"
+            echo "Enter your option:"
+            read option
+            if [[ $option == "1" ]]; then
+                echo "Enter Resource Group:"
+                read resource_group
+                az policy assignment list --resource-group $resource_group
+            elif [[ $option == "2" ]]; then
+                echo "Enter Subscription:"
+                read subscription_id
+                az policy assignment list --subscription $subscription_id
+            else
+                echo "Invalid option"
+            fi
+            ;;
+        *)
+            echo "Invalid choice."
+            ;;
+    esac
+    #az aks show --resource-group $resource_group --name $cluster_name --query linuxProfile.adminUsername -o tsv
+    #az aks show --resource-group $resource_group --name $cluster_name --query linuxProfile.ssh.publicKeys[0].keyData -o tsv
+    #az aks show --resource-group $resource_group --name $cluster_name --query location -o tsv
+    #az aks show --resource-group $resource_group --name $cluster_name --query sku.tier -o tsv
+    #az aks show --resource-group $resource_group --name $cluster_name --query nodeProvisioningProfile -o tsv
 }
 
 function aks_nodepool_information() {
@@ -861,6 +887,7 @@ echo "11. Get AKS Versions by location"
 echo "12. Upgrade AKS or Nodepool"
 echo "13. AKS Enable or Disable Addons"
 echo "14. Az vmss"
+echo "15. Information"
 echo "99. Cluster Analysis (Top Nodes, Top Pods, MSI, SPN, PDB, PowerState, Credentials, AKS URL...)"
 read option
 
@@ -906,6 +933,9 @@ case $option in
         ;;
     14)
         az_vmss
+        ;;
+    15)
+        az_aks_information
         ;;
     99)
         cluster_analysis
