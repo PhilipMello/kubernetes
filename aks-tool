@@ -137,6 +137,8 @@ function aks_create() {
         read node_vm_size
         echo "Enter Managed Identity (MSI) OR Service Princiapl Name (SPN):{msi, spn}"
         read msi_or_spn
+        echo "Enable Microsoft Entra integration and Azure RBAC for Kubernetes Authorization? Enter (y, n)"
+        read "enable_aad_rbac"
 
         if [[ "$msi_or_spn" == "msi" ]]; then
             msi_or_spn="--tags ManagedCluster:PhilipMelloScriptAutomation"
@@ -146,12 +148,20 @@ function aks_create() {
             echo "Invalid input. Please enter MSI or SPN."
         fi
 
+        if [[ $enable_aad_rbac =~ "[Yy]" ]]; then
+            enable_aad_rbac="--enable-aad --enable-azure-rbac"
+        elif [[ $enable_aad_rbac == "[Nn]" ]]; then
+            enable_aad_rbac=""
+        else
+            echo "Invalid input."
+        fi
+
         echo -e "
         +-------------------------------------------------------------------------+
         |${MAGENTA}AKS Creating${ENDCOLOR}
         +-------------------------------------------------------------------------+
         "  
-        az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn
+        az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn $enable_aad_rbac
         echo -e "
         +-------------------------------------------------------------------------+
         |${GREEN}AKS Created${ENDCOLOR}
@@ -529,6 +539,8 @@ function aks_enable_disable_addon() {
         elif [[ "$addons_option" == "3" ]]; then
         echo  -e "
         Troubleshoot Azure Kubernetes Service backup and restore
+        Microsoft Official Documentation:
+        'https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-backup-troubleshoot'
 
         Scenario 1
         Error message:
@@ -545,16 +557,27 @@ function aks_enable_disable_addon() {
             2.Go to Node pools under Settings.
             3.Select Scale node pool, and then update the minimum and maximum values on the Node count range.
             4.Select Apply.
-            5.AKS Backup Extension installation error resolutions${ENDCOLOR}
+            5.AKS Backup Extension installation error resolutions
+            ${ENDCOLOR}
 
         ---
         Scenario 4
         Error message:
-        ${RED}dataprotection-microsoft 4m1s Warning   FailedCreate   job/dataprotection-microsoft-kubernetes-agent-upgrade-crds   Error creating: admission webhook "validation.gatekeeper.sh"
-        denied the request: [azurepolicy-k8sazurev2containerallowedimag-3a4821c975f10fdc4e71] 
-        Container image mcr.microsoft.com/azurebackup/k8s/velero:0.0.02574.247 for container velero has not been allowed....${ENDCOLOR}
+        ${RED}dataprotection-microsoft 1s Warning FailedCreate job/dataprotection-microsoft-kubernetes-agent-upgrade-crds Error creating: admission webhook "validation.gatekeeper.sh"
+        denied the request: [azurepolicy-k8sazurev2containerallowedimag-xxxxxxxxxxxxxxxxxxxx] 
+        Container image mcr.microsoft.com/azurebackup/k8s/velero:0.0.02574.247 for container velero has not been allowed....
+        ${ENDCOLOR}
 
-        Resolution: Edit policy in Azure Portal.
+        Solution 1:
+        Include “dataprotection-microsoft” into namespace exclusions:
+
+        ["dataprotection-microsoft","kube-system","gatekeeper-system","azure-arc","azure-extensions-usage-system"]
+
+        Go to: Home > Policy > Assignments > "FIND THE POLICY"
+
+        ---
+
+        Solution 2: Edit policy in Azure Portal.
 
         Go to: Home > Policy > Assignments > Kubernetes cluster containers should only use allowed images
         change to allow in: Parameters
@@ -563,9 +586,6 @@ function aks_enable_disable_addon() {
 
         1. To check logs of the *ExtensionAgent* pod, run the following command:
         kubectl get events -A
-
-            Other Scenarios go to:
-        'https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-backup-troubleshoot'
         "
         else
             echo "Incorret Option"
