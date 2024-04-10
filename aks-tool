@@ -118,7 +118,7 @@ function aks_create() {
         az aks get-credentials --resource-group $resource_group --name $cluster_name --overwrite-existing
         ;;
     2)
-        # Create AKS cluster
+        # Create AKS with options
         echo "Enter Resource Group Name:"
         read resource_group
         echo "Enter Cluster Name:"
@@ -150,7 +150,7 @@ function aks_create() {
 
         if [[ $enable_aad_rbac =~ "[Yy]" ]]; then
             enable_aad_rbac="--enable-aad --enable-azure-rbac"
-        elif [[ $enable_aad_rbac == "[Nn]" ]]; then
+        elif [[ $enable_aad_rbac =~ "[Nn]" ]]; then
             enable_aad_rbac=""
         else
             echo "Invalid input."
