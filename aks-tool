@@ -141,9 +141,9 @@ function aks_create() {
         read "enable_aad_rbac"
 
         if [[ "$msi_or_spn" == "msi" ]]; then
-            msi_or_spn="--tags ManagedCluster:PhilipMelloScriptAutomation"
+            msi_or_spn="--tags AKS_ManagedCluster=PhilipMelloScriptAutomation"
         elif [[ "$msi_or_spn" == "spn" ]]; then
-            msi_or_spn="--service-principal --tags ServicePrincipal:PhilipMelloScriptAutomation"
+            msi_or_spn="--service-principal --tags AKS_ServicePrincipal=PhilipMelloScriptAutomation"
         else
             echo "Invalid input. Please enter MSI or SPN."
         fi
@@ -794,6 +794,29 @@ function az_aks_addon_check() {
     echo "$az_aks_addon_check_cmd"
 }
 
+function az_aks_rotate_certs() {
+    # Manually rotate your cluster certificates
+    echo -e "
+    'Microsoft Official Documentation: https://learn.microsoft.com/en-us/azure/aks/certificate-rotation#manually-rotate-your-cluster-certificates'
+    "
+    echo "Enter Resource Group:"
+    read resource_group
+    echo "Enter Cluster Name:"
+    read cluster_name
+    echo -e "
+    +-------------------------------------------------------------------------+
+    |${MAGENTE}Rotating your cluster certificates${ENDCOLOR}
+    |Resource Group: $resource_group || Cluster Name: $cluster_name
+    +--------------------------------------------------------------------------------------------------------+
+    |${YELLOW}Warning
+    |   Rotating your certificates using az aks rotate-certs recreates all of your nodes, 
+    |   Virtual Machine Scale Sets and Disks and can cause up to 30 minutes of downtime for your AKS cluster.
+    |${ENDCOLOR}
+    +--------------------------------------------------------------------------------------------------------+
+    "
+    az aks rotate-certs --resource-group $resource_group --name $cluster_name
+}
+
 function cluster_analysis() {
     # AKS Cluster Analysis
     echo "Enter Resource Group:"
@@ -888,6 +911,7 @@ echo "12. Upgrade AKS or Nodepool"
 echo "13. AKS Enable or Disable Addons"
 echo "14. Az vmss"
 echo "15. Information"
+echo "16. Manually rotate your cluster certificates"
 echo "99. Cluster Analysis (Top Nodes, Top Pods, MSI, SPN, PDB, PowerState, Credentials, AKS URL...)"
 read option
 
@@ -936,6 +960,9 @@ case $option in
         ;;
     15)
         az_aks_information
+        ;;
+    16)
+        az_aks_rotate_certs
         ;;
     99)
         cluster_analysis
