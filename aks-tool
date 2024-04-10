@@ -797,7 +797,8 @@ function az_aks_addon_check() {
 function az_aks_rotate_certs() {
     # Manually rotate your cluster certificates
     echo -e "
-    'Microsoft Official Documentation: https://learn.microsoft.com/en-us/azure/aks/certificate-rotation#manually-rotate-your-cluster-certificates'
+    Microsoft Official Documentation: 
+    'https://learn.microsoft.com/en-us/azure/aks/certificate-rotation#manually-rotate-your-cluster-certificates'
     "
     echo "Enter Resource Group:"
     read resource_group
@@ -805,16 +806,27 @@ function az_aks_rotate_certs() {
     read cluster_name
     echo -e "
     +-------------------------------------------------------------------------+
-    |${MAGENTE}Rotating your cluster certificates${ENDCOLOR}
+    |${MAGENTA}Rotating your cluster certificates${ENDCOLOR}
     |Resource Group: $resource_group || Cluster Name: $cluster_name
     +--------------------------------------------------------------------------------------------------------+
-    |${YELLOW}Warning
-    |   Rotating your certificates using az aks rotate-certs recreates all of your nodes, 
-    |   Virtual Machine Scale Sets and Disks and can cause up to 30 minutes of downtime for your AKS cluster.
-    |${ENDCOLOR}
+    |${YELLOW}Warning${ENDCOLOR}
+    |   ${YELLOW}Rotating your certificates using az aks rotate-certs recreates all of your nodes,${ENDCOLOR}
+    |   ${YELLOW}Virtual Machine Scale Sets and Disks and can cause up to 30 minutes of downtime for your AKS cluster.${ENDCOLOR}
     +--------------------------------------------------------------------------------------------------------+
     "
     az aks rotate-certs --resource-group $resource_group --name $cluster_name
+
+    echo "Enter MC_Resource Group:"
+    read resource_group
+    echo "Enter VMSS ScaleSet Name"
+    read vmss_scaleset
+    echo -e "
+    +--------------------------------------------------------------------------------------------------------+
+    |${MAGENTA}Checking Virtual Machine Scale Set agent node certificate expiration date${ENDCOLOR}
+    |Resource Group: $mc_resource_group || Cluster Name: $cluster_name
+    +--------------------------------------------------------------------------------------------------------+
+    "
+    az vmss run-command invoke --resource-group $resource_group --name $vmss_scaleset --instance-id 0 --command-id RunShellScript --scripts "openssl x509 -enddate -noout -in /etc/kubernetes/certs/client.crt"
 }
 
 function cluster_analysis() {
