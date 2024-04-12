@@ -91,8 +91,15 @@ function az_resource_group() {
 
 function aks_create() {
     # AKS Creation
+    echo -e "az aks create: 
+    'https://learn.microsoft.com/pt-pt/cli/azure/aks?view=azure-cli-latest#az-aks-create'
+    "
+    echo -e "General purpose virtual machine sizes: 
+    'https://learn.microsoft.com/en-us/azure/virtual-machines/sizes-general'
+    "
     echo "1. Create AKS Default"
     echo "2. Create AKS with more options (Location, Node-Count, Network-Plugin, Tier, OS-SKU, VM-Size)"
+    echo "3. Create Private AKS with more options (Location, Node-Count, Network-Plugin, Tier, OS-SKU, VM-Size)"
     read option
 
     case $option in
@@ -133,7 +140,62 @@ function aks_create() {
         read tier
         echo "Enter OS SKU:{AzureLinux, CBLMariner, Mariner, Ubuntu}"
         read os_sku
-        echo "Enter Node VM Size:{Standard_B2s, standard_ds2_v2}"
+        echo "Enter Node VM Size:{Standard_B2s, Standard_D3_v2, Standard_D16d_v4, standard_ds2_v2}"
+        read node_vm_size
+        echo "Enter Managed Identity (MSI) OR Service Princiapl Name (SPN):{msi, spn}"
+        read msi_or_spn
+        echo "Enable Microsoft Entra integration and Azure RBAC for Kubernetes Authorization? Enter (y, n)"
+        read "enable_aad_rbac"
+
+        if [[ "$msi_or_spn" == "msi" ]]; then
+            msi_or_spn="--tags AKS_ManagedCluster=PhilipMelloScriptAutomation"
+        elif [[ "$msi_or_spn" == "spn" ]]; then
+            msi_or_spn="--service-principal --tags AKS_ServicePrincipal=PhilipMelloScriptAutomation"
+        else
+            echo "Invalid input. Please enter MSI or SPN."
+        fi
+
+        if [[ $enable_aad_rbac == [Yy] ]]; then
+            enable_aad_rbac="--enable-aad --enable-azure-rbac"
+        elif [[ $enable_aad_rbac == [Nn] ]]; then
+            enable_aad_rbac=""
+        else
+            echo "Invalid input."
+        fi
+
+        echo -e "
+        +-------------------------------------------------------------------------+
+        |${MAGENTA}AKS Creating${ENDCOLOR}
+        +-------------------------------------------------------------------------+
+        "  
+        az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn $enable_aad_rbac
+        echo -e "
+        +-------------------------------------------------------------------------+
+        |${GREEN}AKS Created${ENDCOLOR}
+        |Resource Group: $resource_group || Cluster Name: $cluster_name
+        +-------------------------------------------------------------------------+
+        |$(aks_get_url)
+        +-------------------------------------------------------------------------+
+        "  
+        az aks get-credentials --resource-group $resource_group --name $cluster_name --overwrite-existing
+        ;;
+    3)
+        # Create AKS with options
+        echo "Enter Resource Group Name:"
+        read resource_group
+        echo "Enter Cluster Name:"
+        read cluster_name
+        echo "Enter Location:{centralus, eastus, eastus2, swedencentral}"
+        read location
+        echo "Enter Node Count:{1, 2, 3,...}"
+        read node_count
+        echo "Enter Network Plugin:{azure, kubenet, none}"
+        read network_plugin
+        echo "Enter Tier:{free, premium, standard}"
+        read tier
+        echo "Enter OS SKU:{AzureLinux, CBLMariner, Mariner, Ubuntu}"
+        read os_sku
+        echo "Enter Node VM Size:{Standard_B2s, Standard_D3_v2, Standard_D16d_v4, standard_ds2_v2}"
         read node_vm_size
         echo "Enter Managed Identity (MSI) OR Service Princiapl Name (SPN):{msi, spn}"
         read msi_or_spn
