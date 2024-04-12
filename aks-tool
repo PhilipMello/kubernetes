@@ -55,7 +55,7 @@ function az_resource_group() {
             echo "To see locations run: az account list-locations -o table"
             echo "Enter Resource Group location:"
             read location
-            echo "Enter tag name, or hit enter to no tag"
+            echo "Enter tag name, or hit enter to no tag, Ex: aks=prod"
             read tags
             az group create --name $resource_group --location $location --tags $tags
             exit 110
@@ -108,7 +108,7 @@ function aks_create() {
         |${MAGENTA}AKS Creating${ENDCOLOR}
         +-------------------------------------------------------------------------+
         "  
-        az aks create --resource-group $resource_group --name $cluster_name --node-count 1
+        az aks create --resource-group $resource_group --name $cluster_name --node-count 1 --tags AKS_ManagedCluster=PhilipMelloScriptAutomation
         echo -e "
         +-------------------------------------------------------------------------+
         |${GREEN}AKS Created${ENDCOLOR}
@@ -148,9 +148,9 @@ function aks_create() {
             echo "Invalid input. Please enter MSI or SPN."
         fi
 
-        if [[ $enable_aad_rbac =~ "[Yy]" ]]; then
+        if [[ $enable_aad_rbac == [Yy] ]]; then
             enable_aad_rbac="--enable-aad --enable-azure-rbac"
-        elif [[ $enable_aad_rbac =~ "[Nn]" ]]; then
+        elif [[ $enable_aad_rbac == [Nn] ]]; then
             enable_aad_rbac=""
         else
             echo "Invalid input."
