@@ -12,6 +12,7 @@ github='https://github.com/PhilipMello/kubernetes/'
 github2='https://github.com/AtomyCloud/kubernetes'
 # Microsoft Official Documentation
 microsoft=''
+AKS_Kubernetes_release_calendar='https://learn.microsoft.com/en-us/azure/aks/supported-kubernetes-versions?tabs=azure-cli#aks-kubernetes-release-calendar'
 echo "
 # --------------------------------------------------------------
 # Script     : Microsoft Azure AKS Script Automation
@@ -891,6 +892,136 @@ function az_aks_rotate_certs() {
     az vmss run-command invoke --resource-group $resource_group --name $vmss_scaleset --instance-id 0 --command-id RunShellScript --scripts "openssl x509 -enddate -noout -in /etc/kubernetes/certs/client.crt"
 }
 
+function az_enable_disable_csi_drivers() {
+    echo -e "Enable CSI storage drivers on an existing cluster
+    'https://learn.microsoft.com/en-us/azure/aks/csi-storage-drivers#enable-csi-storage-drivers-on-an-existing-cluster'
+    "
+    echo "1. Azure Disks CSI driver"
+    echo "2. Azure Files CSI driver"
+    echo "3. Azure Blob storage CSI driver"
+    echo "4. snapshot controller"
+    echo "Enter your option:"
+    read option
+
+    case $option in
+        1)
+            echo "Azure Disks CSI driver"
+            echo "Choose Option: (1 = Enable / 2 = Disable / 3 = Troubleshoot)"
+            read option
+            echo "Enter Resource Group:"
+            read resource_group
+            echo "Enter Cluster Name:"
+            read cluster_name
+            if [[ $option == "1" ]]; then
+                echo -e "
+                +----------------------------------------------------------------------+
+                |${MAGENTA}Enabling Azure Disks CSI driver${ENDCOLOR}
+                |Resource Group: $resource_group || Cluster Name: $cluster_name
+                +----------------------------------------------------------------------+
+                "
+                az aks update --resource-group $resource_group --name $cluster_name --enable-disk-driver
+            elif [[ $option == "2" ]]; then
+                echo -e "
+                +----------------------------------------------------------------------+
+                |${MAGENTA}Disabling Azure Disks CSI driver${ENDCOLOR}
+                |Resource Group: $resource_group || Cluster Name: $cluster_name
+                +----------------------------------------------------------------------+
+                "
+                az aks update --resource-group $resource_group --name $cluster_name --disable-disk-driver
+            else
+                echo "invalid choice."
+            fi
+            ;;
+        2)
+            echo "Azure Files CSI driver"
+            echo "Choose Option: (1 = Enable / 2 = Disable / 3 = Troubleshoot)"
+            read option
+            echo "Enter Resource Group:"
+            read resource_group
+            echo "Enter Cluster Name:"
+            read cluster_name
+            if [[ $option == "1" ]]; then
+                echo -e "
+                +----------------------------------------------------------------------+
+                |${MAGENTA}Enabling Azure Files CSI driver${ENDCOLOR}
+                |Resource Group: $resource_group || Cluster Name: $cluster_name
+                +----------------------------------------------------------------------+
+                "
+                az aks update --resource-group $resource_group --name $cluster_name --enable-file-driver
+            elif [[ $option == "2" ]]; then
+                echo -e "
+                +----------------------------------------------------------------------+
+                |${MAGENTA}Disabling Azure Files CSI driver${ENDCOLOR}
+                |Resource Group: $resource_group || Cluster Name: $cluster_name
+                +----------------------------------------------------------------------+
+                "
+                az aks update --resource-group $resource_group --name $cluster_name --disable-file-driver
+            else
+                echo "invalid choice."
+            fi
+            ;;
+        3)
+            echo "Azure Blob storage CSI driver"
+            echo "Choose Option: (1 = Enable / 2 = Disable / 3 = Troubleshoot)"
+            read option
+            echo "Enter Resource Group:"
+            read resource_group
+            echo "Enter Cluster Name:"
+            read cluster_name
+            if [[ $option == "1" ]]; then
+                echo -e "
+                +----------------------------------------------------------------------+
+                |${MAGENTA}Enabling Azure Blob storage CSI driver${ENDCOLOR}
+                |Resource Group: $resource_group || Cluster Name: $cluster_name
+                +----------------------------------------------------------------------+
+                "
+                az aks update --resource-group $resource_group --name $cluster_name --enable-blob-driver
+            elif [[ $option == "2" ]]; then
+                echo -e "
+                +----------------------------------------------------------------------+
+                |${MAGENTA}Disabling Azure Blob storage CSI driver${ENDCOLOR}
+                |Resource Group: $resource_group || Cluster Name: $cluster_name
+                +----------------------------------------------------------------------+
+                "
+                az aks update --resource-group $resource_group --name $cluster_name --disable-blob-driver
+            else
+                echo "invalid choice."
+            fi
+            ;;
+        4)
+            echo "snapshot controller"
+            echo "Choose Option: (1 = Enable / 2 = Disable / 3 = Troubleshoot)"
+            read option
+            echo "Enter Resource Group:"
+            read resource_group
+            echo "Enter Cluster Name:"
+            read cluster_name
+            if [[ $option == "1" ]]; then
+                echo -e "
+                +----------------------------------------------------------------------+
+                |${MAGENTA}Enabling snapshot controller${ENDCOLOR}
+                |Resource Group: $resource_group || Cluster Name: $cluster_name
+                +----------------------------------------------------------------------+
+                "
+                az aks update --resource-group $resource_group --name $cluster_name --enable-snapshot-controller
+            elif [[ $option == "2" ]]; then
+                echo -e "
+                +----------------------------------------------------------------------+
+                |${MAGENTA}Disabling snapshot controller${ENDCOLOR}
+                |Resource Group: $resource_group || Cluster Name: $cluster_name
+                +----------------------------------------------------------------------+
+                "
+                az aks update --resource-group $resource_group --name $cluster_name --disable-snapshot-controller
+            else
+                echo "invalid choice."
+            fi
+            ;;
+        *)
+            echo "Invalid choice"
+            ;;
+    esac
+}
+
 function cluster_analysis() {
     # AKS Cluster Analysis
     echo "Enter Resource Group:"
@@ -986,6 +1117,7 @@ echo "13. AKS Enable or Disable Addons"
 echo "14. Az vmss"
 echo "15. Information"
 echo "16. Manually rotate your cluster certificates"
+echo "17. Enable or Disable CSI storage drivers on an existing cluster"
 echo "99. Cluster Analysis (Top Nodes, Top Pods, MSI, SPN, PDB, PowerState, Credentials, AKS URL...)"
 read option
 
@@ -1037,6 +1169,9 @@ case $option in
         ;;
     16)
         az_aks_rotate_certs
+        ;;
+    17)
+        az_enable_disable_csi_drivers
         ;;
     99)
         cluster_analysis
