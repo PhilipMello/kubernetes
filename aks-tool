@@ -566,6 +566,9 @@ function aks_get_pv_pvc() {
 
 function aks_enable_disable_addon() {
     # AKS Enable or Disable Addons
+    echo -e "az aks addon
+    'https://learn.microsoft.com/en-us/cli/azure/aks/addon?view=azure-cli-latest#az-aks-addon-list'
+    "
     echo "1. Enable or Disable AKS Backup Extension"
     echo "2. Enable or Disable Monitoring logs"
     echo "3. Enable or Disable open-service-mesh addon"
@@ -594,7 +597,6 @@ function aks_enable_disable_addon() {
             |is affecting the AKS Backup Addon Installation${ENDCOLOR}
             +-------------------------------------------------------------------------+
             "
-            exit 1
             fi
             echo "Enable AKS Backup Extension"
             echo "Enter Resource Group:"
@@ -825,6 +827,34 @@ function az_cli_tools(){
         ;;
     *)
          echo "Invalid choice. Please select 1, 2 or 3."
+        ;;
+    esac
+}
+
+function az_vm() {
+    # Run command on vm
+    echo "1. Run command on vm"
+    echo "Enter your option:"
+    read option
+    echo -e "
+    Microsoft Official Documentation: 
+    'https://learn.microsoft.com/en-us/azure/virtual-machines/linux/run-command'
+    "
+    case $option in
+    1)
+        echo "Run command"
+        echo "Enter Resource Group:"
+        read resource_group
+        echo "Enter VM Name:"
+        read vm_name
+        echo -e "Enter your command, Ex: apt-get update && apt-get install -y nginx
+        To run commands as a different user, enter sudo -u to specify a user account.
+        "
+        read vm_command
+        az vm run-command invoke --resource-group $resource_group --name $vm_name --command-id RunShellScript --scripts "$vm_command"
+        ;;
+    *)
+        echo "Invalid choice"
         ;;
     esac
 }
@@ -1136,6 +1166,7 @@ echo "14. Az vmss"
 echo "15. Information"
 echo "16. Manually rotate your cluster certificates"
 echo "17. Enable or Disable CSI storage drivers on an existing cluster"
+echo "18. Run command on VM"
 echo "99. Cluster Analysis (Top Nodes, Top Pods, MSI, SPN, PDB, PowerState, Credentials, AKS URL...)"
 read option
 
@@ -1190,6 +1221,9 @@ case $option in
         ;;
     17)
         az_enable_disable_csi_drivers
+        ;;
+    18)
+        az_vm
         ;;
     99)
         cluster_analysis
