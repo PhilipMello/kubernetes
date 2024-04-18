@@ -922,7 +922,6 @@ function az_vmss() {
         read vmss_scaleset
         az vmss list-instance-connection-info --name $vmss_scaleset --resource-group $resource_group
         ;;
-        ;;
     6)
         echo "Az vmss list-instance-public-ips"
         echo "Enter MC_Resource Group:"
