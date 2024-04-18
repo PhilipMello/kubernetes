@@ -862,6 +862,13 @@ function az_vm() {
 function az_vmss() {
     echo "1. vmss delete-instances"
     echo "2. vmss deallocate"
+    echo "3. vmss view instances"
+    echo "4. vmss list"
+    echo "5. vmss list-instance-connection-info"
+    echo "6. vmss list-instance-public-ips"
+    echo "7. vmss list-skus"
+    echo "8. vmss perform-maintenance"
+    echo "9. vmss reimage"
     echo "Enter your option:"
     read option
     echo -e "
@@ -893,8 +900,193 @@ function az_vmss() {
         read vmss_id
         az vmss deallocate --instance-ids $vmss_id --name $vmss_scaleset --resource-group $resource_group
         ;;
+    3)
+        echo "Az vmss view instances"
+        echo "Enter MC_Resource Group:"
+        read resource_group
+        echo "Enter VMSS ScaleSet Name"
+        read vmss_scaleset
+        az vmss get-instance-view --name $vmss_scaleset --resource-group $resource_group
+        ;;
+    4)
+        echo "Az vmss list"
+        echo "Enter MC_Resource Group:"
+        read resource_group
+        az vmss list --resource-group $resource_group
+        ;;
+    5)
+        echo "Az vmss list-instance-connection-info"
+        echo "Enter MC_Resource Group:"
+        read resource_group
+        echo "Enter VMSS ScaleSet Name"
+        read vmss_scaleset
+        az vmss list-instance-connection-info --name $vmss_scaleset --resource-group $resource_group
+        ;;
+        ;;
+    6)
+        echo "Az vmss list-instance-public-ips"
+        echo "Enter MC_Resource Group:"
+        read resource_group
+        echo "Enter VMSS ScaleSet Name"
+        read vmss_scaleset
+        az vmss list-instance-public-ips --name $vmss_scaleset --resource-group $resource_group
+        ;;
+    7)
+        echo "Az vmss list-skus"
+        echo "Enter MC_Resource Group:"
+        read resource_group
+        echo "Enter VMSS ScaleSet Name"
+        read vmss_scaleset
+        az vmss list-skus --name $vmss_scaleset --resource-group $resource_group
+        ;;
+    8)
+        echo "Az vmss perform-maintenance"
+        echo "Under deployment"
+        #echo "Enter MC_Resource Group:"
+        #read resource_group
+        #echo "Enter VMSS ScaleSet Name"
+        #read vmss_scaleset
+        #echo "Enter VMSS ID"
+        #read vmss_id
+        #az vmss perform-maintenance --name $vmss_scaleset --instance-ids $vmss_id --ids --resource-group $resource_group                 
+        ;;
+    9)
+        echo "Az vmss reimage"
+        echo "Enter MC_Resource Group:"
+        read resource_group
+        echo "Enter VMSS ScaleSet Name"
+        read vmss_scaleset
+        echo "Enter VMSS ID, Ex: 1 or 1 2 3"
+        read vmss_id
+        echo "Enter Subscription"
+        read subscription
+        az vmss reimage --name $vmss_scaleset --instance-ids $vmss_id --resource-group $resource_group --subscription $subscription
+        #Reimage all the VM instances within a VMSS.
+        #az vmss reimage --name MyScaleSet --resource-group MyResourceGroup --subscription MySubscription
+        ;;
+    10)
+        echo "Az vmss restart"
+        echo -e "Microsoft Official Documentation:
+        'https://learn.microsoft.com/en-us/cli/azure/vmss?view=azure-cli-latest#az-vmss-restart'
+        "
+        echo "Enter MC_Resource Group:"
+        read resource_group
+        echo "Enter VMSS ScaleSet Name"
+        read vmss_scaleset
+        echo "Enter VMSS ID, Ex: 1 or 1 2 3"
+        read vmss_id
+        az vmss restart --instance-ids $vmss_id --name $vmss_scaleset --resource-group $resource_group
+        ;;
+    11)
+        echo "Az vmss scale"
+        echo -e "Microsoft Official Documentation:
+        'https://learn.microsoft.com/en-us/cli/azure/vmss?view=azure-cli-latest#az-vmss-scale'
+        "
+        echo "Enter MC_Resource Group:"
+        read resource_group
+        echo "Enter VMSS ScaleSet Name"
+        read vmss_scaleset
+        echo "Enter number to Scale, Ex: 2, 4, 6..."
+        read new_capacity
+        az vmss scale --name $vmss_scaleset --new-capacity $new_capacity --resource-group $resource_group
+        ;;
+    12)
+        echo "az vmss set-orchestration-service-state"
+        echo "Under deployment"
+        #az vmss set-orchestration-service-state --service-name AutomaticRepairs --action Resume --name MyScaleSet --resource-group MyResourceGroup
+        ;;
+    13)
+        echo "Az vmss show"
+        echo -e "Microsoft Official Documentation:
+        'https://learn.microsoft.com/en-us/cli/azure/vmss?view=azure-cli-latest#az-vmss-show'
+        "
+        echo "Enter MC_Resource Group:"
+        read resource_group
+        echo "Enter VMSS ScaleSet Name"
+        read vmss_scaleset
+        az vmss show --name $vmss_scaleset --resource-group $resource_group
+        ;;
+    14)
+        echo "az vmss simulate-eviction"
+        echo "Under deployment"
+        #az vmss simulate-eviction --resource-group MyResourceGroup --name MyScaleSet --instance-id 0
+        ;;
+    15)
+        echo "Az vmss start"
+        echo -e "Microsoft Official Documentation:
+        'https://learn.microsoft.com/en-us/cli/azure/vmss?view=azure-cli-latest#az-vmss-start'
+        "
+        echo "Enter MC_Resource Group:"
+        read resource_group
+        echo "Enter VMSS ScaleSet Name"
+        read vmss_scaleset
+        echo "Enter VMSS ID, Ex: 1 or 1 2 3"
+        read vmss_id
+        az vmss start --instance-ids $vmss_id --name $vmss_scaleset --resource-group $resource_group
+        ;;
+    16)
+        echo "Az vmss stop"
+        echo -e "Microsoft Official Documentation:
+        'https://learn.microsoft.com/en-us/cli/azure/vmss?view=azure-cli-latest#az-vmss-stop'
+        "
+        echo "Enter MC_Resource Group:"
+        read resource_group
+        echo "Enter VMSS ScaleSet Name"
+        read vmss_scaleset
+        echo "Enter VMSS ID, Ex: 1 or 1 2 3"
+        read vmss_id
+        az vmss stop --instance-ids $vmss_id --name $vmss_scaleset --resource-group $resource_group
+        #Power off VMs within a VMSS without shutting down.
+        #az vmss stop --name MyScaleSet --resource-group MyResourceGroup --skip-shutdown
+        ;;
+    17)
+        echo "Az vmss update"
+        echo "Under deployment"
+        echo -e "Microsoft Official Documentation:
+        'https://learn.microsoft.com/en-us/cli/azure/vmss?view=azure-cli-latest#az-vmss-update'
+        "
+        ;;
+    18)
+        echo "Az vmss update-domain-walk"
+        echo "Under deployment"
+        echo -e "Microsoft Official Documentation:
+        'https://learn.microsoft.com/en-us/cli/azure/vmss?view=azure-cli-latest#az-vmss-update-domain-walk'
+        "
+        ;;
+    19)
+        echo "Az vmss update-instances"
+        echo -e "Microsoft Official Documentation:
+        'https://learn.microsoft.com/en-us/cli/azure/vmss?view=azure-cli-latest#az-vmss-update-instances'
+        "
+        echo "Enter MC_Resource Group:"
+        read resource_group
+        echo "Enter VMSS ScaleSet Name"
+        read vmss_scaleset
+        echo "Enter VMSS ID, Ex: 1 or 1 2 3"
+        read vmss_id
+        az vmss update-instances --instance-ids $vmss_id --name $vmss_scaleset --resource-group $resource_group
+        ;;
+    20)
+        echo "Az vmss wait"
+        echo -e "Microsoft Official Documentation:
+        'https://learn.microsoft.com/en-us/cli/azure/vmss?view=azure-cli-latest#az-vmss-wait'
+        "
+        echo "Enter MC_Resource Group:"
+        read resource_group
+        echo "Enter VMSS ScaleSet Name"
+        read vmss_scaleset
+        az vmss wait --updated --name $vmss_scaleset --resource-group $resource_group
+        #Place the CLI in a waiting state until the VMSS has been updated
+        #az vmss wait --updated --name MyScaleSet --resource-group MyResourceGroup
+        #---
+        #Place the CLI in a waiting state until the VMSS instance has been updated.
+        #az vmss wait --updated --instance-id 1 --name MyScaleSet --resource-group MyResourceGroup
+        #---
+        #Place the CLI in a waiting state until a condition of a scale set is met. (autogenerated)
+        #az vmss wait --created --name MyScaleSet --resource-group MyResourceGroup
+        ;;
     *)
-         echo "Invalid choice. Please select 1 or 2."
+         echo "Invalid choice!"
         ;;
     esac
 }
