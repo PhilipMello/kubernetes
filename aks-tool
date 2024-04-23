@@ -139,6 +139,7 @@ function aks_create() {
         read network_plugin
         echo "Enter Tier:{free, premium, standard}"
         read tier
+        read -p "Enter Kubernetes version, Ex:.(1.27.9, 1.28.3, 1.28.5, 1.29.0, 1.29.2)": kubernetes_version
         echo "Enter OS SKU:{AzureLinux, CBLMariner, Mariner, Ubuntu}"
         read os_sku
         echo "Enter Node VM Size:{Standard_B2s, Standard_D3_v2, Standard_D16d_v4, standard_ds2_v2}"
@@ -169,7 +170,7 @@ function aks_create() {
         |${MAGENTA}AKS Creating${ENDCOLOR}
         +-------------------------------------------------------------------------+
         "  
-        az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn $enable_aad_rbac
+        az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --kubernetes-version $kubernetes_version --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn $enable_aad_rbac
         echo -e "
         +-------------------------------------------------------------------------+
         |${GREEN}AKS Created${ENDCOLOR}
