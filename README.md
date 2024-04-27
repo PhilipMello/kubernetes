@@ -1,4 +1,4 @@
-<img src="assets/images/aks-azure-kubernetes-services.webp" aling="right">
+<img src="assets/images/aks-azure-kubernetes-services.webp" align="right">
 
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/t/philipmello/kubernetes?style=for-the-badge&logo=github&logoSize=auto&labelColor=%238000ff&color=%23bf00ff)
 ![GitHub followers](https://img.shields.io/github/followers/philipmello?style=for-the-badge&labelColor=%2300bfff&color=%23bf00ff)
@@ -8,18 +8,6 @@
 
 
 # <p align="center">🔧 Azure Kubernetes Tools (AKS)</p>
-
-<!--START-->
-<a class="github-button" href="https://github.com/PhilipMello" data-color-scheme="no-preference: light; light: light; dark: dark;" data-size="large" aria-label="Follow @PhilipMello on GitHub">Follow @PhilipMello</a>
-<!--END-->
-
-<!--START-->
-<a class="github-button" href="https://github.com/PhilipMello/kubernetes/subscription" data-color-scheme="no-preference: light; light: light; dark: dark;" data-icon="octicon-eye" data-size="large" aria-label="Watch PhilipMello/kubernetes on GitHub">Watch</a>
-<!--END-->
-
-<!--START-->
-<a class="github-button" href="https://github.com/PhilipMello/kubernetes/fork" data-color-scheme="no-preference: light; light: light; dark: dark;" data-icon="octicon-repo-forked" data-size="large" aria-label="Fork PhilipMello/kubernetes on GitHub">Fork</a>
-<!--END-->
 
 # 📝 About
 ## Free tools for Kubernetes (k8s)
