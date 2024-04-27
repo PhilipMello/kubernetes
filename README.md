@@ -2,7 +2,9 @@
 ![GitHub followers](https://img.shields.io/github/followers/philipmello?style=for-the-badge&labelColor=%2300bfff&color=%23bf00ff)
 ![GitHub forks](https://img.shields.io/github/forks/philipmello/kubernetes?style=for-the-badge&labelColor=%2300bfff&color=%23bf00ff)
 ![GitHub Repo stars](https://img.shields.io/github/stars/philipmello/kubernetes?style=for-the-badge&labelColor=%23bf00ff)
-![GitHub watchers](https://img.shields.io/github/watchers/philipmello/kubernetes?style=for-the-badge&labelColor=%23bf00ff)
+![GitHub watchers](https://img.shields.io/github/watchers/philipmello/kubernetes?style=for-the-badge&labelColor=%23bf00ff&link=https%3A%2F%2Fgithub.com%2FPhilipMello%2Fkubernetes%2Fwatchers)
+
+
 # <p align="center">🔧 Azure Kubernetes Tools (AKS)</p>
 
 <!--START-->
