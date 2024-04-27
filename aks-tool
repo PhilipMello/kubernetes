@@ -528,13 +528,26 @@ function aks_nodepool_information() {
 
 function az_aks_update_upgrade() {
     # Update OR Upgrade
-    echo "1. Upgrade AKS"
-    echo "2. Upgrade Nodepool"
+    echo "1. Check for available node image upgrades"
+    echo "2. Upgrade AKS"
+    echo "3. Upgrade Nodepool"
     echo "Enter your option:"
     read option
 
     case $option in
     1)
+        echo -e "Microsoft Official Documentation: 
+        'https://learn.microsoft.com/en-us/azure/aks/node-image-upgrade'
+        "
+        echo "Enter Resource Group:"
+        read resource_group
+        echo "Enter Cluster Name:"
+        read cluster_name
+        echo "Enter your Nodepool Name"
+        read nodepool_name
+        az aks nodepool get-upgrades --resource-group $resource_group --name $cluster_name --name $nodepool_name
+        ;;
+    2)
         echo "Enter Resource Group:"
         read resource_group
         echo "Enter Cluster Name:"
@@ -543,7 +556,7 @@ function az_aks_update_upgrade() {
         read k8s_version
         az aks upgrade --resource-group $resource_group --name $cluster_name --kubernetes-version $k8s_version
         ;;
-    2)
+    3)
         echo "Enter Resource Group:"
         read resource_group
         echo "Enter Cluster Name:"
