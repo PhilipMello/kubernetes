@@ -90,7 +90,7 @@ function az_resource_group() {
     esac
 }
 
-function aks_create() {
+function az_aks() {
     # AKS Creation
     echo -e "az aks create: 
     'https://learn.microsoft.com/pt-pt/cli/azure/aks?view=azure-cli-latest#az-aks-create'
@@ -101,6 +101,13 @@ function aks_create() {
     echo "1. Create AKS Default"
     echo "2. Create AKS with more options (Location, Node-Count, Network-Plugin, Tier, OS-SKU, VM-Size)"
     echo "3. Create Private AKS with more options (Location, Node-Count, Network-Plugin, Tier, OS-SKU, VM-Size)"
+    echo "4. Delete AKS"
+    echo "5. Reset Cluster Service Principal Credentials (SPN)"
+    echo "6. Manually rotate your cluster certificates"
+    echo "7. Upgrade AKS or Nodepool"
+    echo "8. AKS Enable or Disable Addons"
+    echo "9. Enable or Disable CSI storage drivers on an existing cluster"
+    echo "10. Get AKS Versions by location"
     read option
 
     case $option in
@@ -236,13 +243,34 @@ function aks_create() {
         "  
         az aks get-credentials --resource-group $resource_group --name $cluster_name --overwrite-existing
         ;;
+    4)
+        az_aks_delete
+        ;;
+    5)
+        az_aks_reset_spn_credentials
+        ;;
+    6)
+        az_aks_rotate_certs
+        ;;
+    7)
+        az_aks_update_upgrade
+        ;;
+    8)
+        aks_enable_disable_addon
+        ;;
+    9)
+        az_enable_disable_csi_drivers
+        ;;
+    10)
+        aks_version_list_location
+        ;;
     *)
-        echo "Invalid choice. Please select 1, 2 or 3."
+        echo "Invalid choice. Please select 1, 2, 3..."
         ;;
     esac
 }
 
-function aks_delete() {
+function az_aks_delete() {
     # Delete AKS cluster
     echo "Enter Resource Group:"
     read resource_group
@@ -275,7 +303,7 @@ function check_credentials_status() {
     echo "$credentials_list"
 }
 
-function reset_spn_credentials() {
+function az_aks_reset_spn_credentials() {
     echo "Enter Resource Group:"
     read resource_group
     echo "Enter Cluster Name:"
@@ -498,7 +526,7 @@ function aks_nodepool_information() {
     az aks nodepool list $resource_group --name $cluster_name -o wide
 }
 
-function aks_update_upgrade() {
+function az_aks_update_upgrade() {
     # Update OR Upgrade
     echo "1. Upgrade AKS"
     echo "2. Upgrade Nodepool"
@@ -832,7 +860,7 @@ function az_cli_tools(){
     esac
 }
 
-function az_vm() {
+function az_vm_run_command() {
     # Run command on vm
     echo "1. Run command on vm"
     echo "Enter your option:"
@@ -1328,7 +1356,7 @@ function cluster_on_off() {
 # Manual
 manual() {
     echo -e "Get AKS Credentials: 'https://docs.microsoft.com/en-US/cli/azure/aks#az_aks_get_credentials'"
-    echo -e "
+    echo -e "Azure CLI Commands
     'https://learn.microsoft.com/en-us/cli/azure/vmss?view=azure-cli-latest#commands'
     "
 
@@ -1341,24 +1369,17 @@ if [[ $1 == "-h" || $1 == "--help" || "$1" == "--h" ]]; then
 fi
 
 echo "Choose an option:"
-echo "1. Create or Delete Resource Group"
-echo "2. Create AKS"
-echo "3. Az Tools (Install az-cli OR kubectl)"
-echo "4. Delete AKS"
-echo "5. Reset Cluster Service Principal Credentials (SPN)"
-echo "6. Backup Pod Disruption Budget (PDB)"
-echo "7. Check ACR Connection"
-echo "8. Check Top (Pods and Nodes)"
-echo "9. Get TCPDUMP"
-echo "10. Get SysLog"
-echo "11. Get AKS Versions by location"
-echo "12. Upgrade AKS or Nodepool"
-echo "13. AKS Enable or Disable Addons"
-echo "14. Az vmss"
-echo "15. Information"
-echo "16. Manually rotate your cluster certificates"
-echo "17. Enable or Disable CSI storage drivers on an existing cluster"
-echo "18. Run command on VM"
+echo "1. Azure Resource Group (Create, Delete, Check)"
+echo "2. AKS Operations (Create, Delete...)"
+echo "3. VMSS Operations"
+echo "4. Run command on VM"
+echo "5. Backup Pod Disruption Budget (PDB)"
+echo "6. Check ACR Connection"
+echo "7. Check Top (Pods and Nodes)"
+echo "8. Get TCPDUMP"
+echo "9. Get SysLog"
+echo "10. Information"
+echo "98. Tools (Install az-cli, kubectl or helm)"
 echo "99. Cluster Analysis (Top Nodes, Top Pods, MSI, SPN, PDB, PowerState, Credentials, AKS URL...)"
 read option
 
@@ -1367,55 +1388,34 @@ case $option in
         az_resource_group
         ;;
     2)  
-        aks_create
+        az_aks
         ;;
     3)
-        az_cli_tools
-        ;;
-    4)
-        aks_delete
-        ;;
-    5)
-        reset_spn_credentials
-        ;;
-    6)
-        backup_pdb
-        ;;
-    7)
-        check_acr_connection
-        ;;
-    8) 
-        aks_check_top
-        ;;
-    9)
-        aks_tcpdump
-        ;;
-    10) 
-        aks_get_syslog
-        ;;
-    11)
-        aks_version_list_location
-        ;;
-    12) 
-        aks_update_upgrade
-        ;;
-    13)
-        aks_enable_disable_addon
-        ;;
-    14)
         az_vmss
         ;;
-    15)
+    4)
+        az_vm_run_command
+        ;;
+    5)
+        backup_pdb
+        ;;
+    6)
+        check_acr_connection
+        ;;
+    7) 
+        aks_check_top
+        ;;
+    8)
+        aks_tcpdump
+        ;;
+    9) 
+        aks_get_syslog
+        ;;
+    10)
         az_aks_information
         ;;
-    16)
-        az_aks_rotate_certs
-        ;;
-    17)
-        az_enable_disable_csi_drivers
-        ;;
-    18)
-        az_vm
+    98)
+        az_cli_tools
         ;;
     99)
         cluster_analysis
