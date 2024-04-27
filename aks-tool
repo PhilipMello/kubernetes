@@ -531,8 +531,8 @@ function az_aks_update_upgrade() {
     echo "1. Check for available node image upgrades"
     echo "2. Upgrade all node images in all node pools"
     echo "3. Upgrade a specific node pool"
-    echo "4. Upgrade AKS Kubernetes Verison"
-    echo "5. Upgrade Nodepool Kubernetes Verison"
+    echo "4. Upgrade AKS Kubernetes Version"
+    echo "5. Upgrade Nodepool Kubernetes Version"
     echo "Enter your option:"
     read option
 
