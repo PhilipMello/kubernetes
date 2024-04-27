@@ -529,8 +529,10 @@ function aks_nodepool_information() {
 function az_aks_update_upgrade() {
     # Update OR Upgrade
     echo "1. Check for available node image upgrades"
-    echo "2. Upgrade AKS"
-    echo "3. Upgrade Nodepool"
+    echo "2. Upgrade all node images in all node pools"
+    echo "3. Upgrade a specific node pool"
+    echo "4. Upgrade AKS Kubernetes Verison"
+    echo "5. Upgrade Nodepool Kubernetes Verison"
     echo "Enter your option:"
     read option
 
@@ -545,9 +547,37 @@ function az_aks_update_upgrade() {
         read cluster_name
         echo "Enter your Nodepool Name"
         read nodepool_name
+
+        echo "Current Version:"
+        az aks nodepool show --resource-group $resource_group --name $cluster_name --name $nodepool_name --query nodeImageVersion
+        echo "Available upgrades:"
         az aks nodepool get-upgrades --resource-group $resource_group --name $cluster_name --name $nodepool_name
         ;;
     2)
+        echo -e "Microsoft Official Documentation: 
+        'https://learn.microsoft.com/en-us/azure/aks/node-image-upgrade#upgrade-all-node-images-in-all-node-pools'
+        "
+        echo "Upgrade all node images in all node pools"
+        echo "Enter Resource Group:"
+        read resource_group
+        echo "Enter Cluster Name:"
+        read cluster_name
+        az aks upgrade --resource-group $resource_group --name $cluster_name --node-image-only
+        ;;
+    3)
+        echo -e "Microsoft Official Documentation: 
+        'https://learn.microsoft.com/en-us/azure/aks/node-image-upgrade#upgrade-a-specific-node-pool'
+        "
+        echo "Upgrade a specific node pool"
+        echo "Enter Resource Group:"
+        read resource_group
+        echo "Enter Cluster Name:"
+        read cluster_name
+        echo "Enter your Nodepool Name"
+        read nodepool_name
+        az aks nodepool upgrade --resource-group $resource_group --name $cluster_name --name $nodepool_name --node-image-only
+        ;;
+    4)
         echo "Enter Resource Group:"
         read resource_group
         echo "Enter Cluster Name:"
@@ -556,7 +586,7 @@ function az_aks_update_upgrade() {
         read k8s_version
         az aks upgrade --resource-group $resource_group --name $cluster_name --kubernetes-version $k8s_version
         ;;
-    3)
+    5)
         echo "Enter Resource Group:"
         read resource_group
         echo "Enter Cluster Name:"
