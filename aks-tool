@@ -1346,7 +1346,8 @@ function az_aks_debug_node () {
     echo "Choose your node"
     read aks_node
 
-    kubectl debug node/$aks_node -it --image=mcr.microsoft.com/cbl-mariner/busybox:2.0 && chroot /host
+    echo -e "You can interact with the node session by running ${YELLOW}chroot /host${ENDCOLOR} from the privileged container."
+    kubectl debug node/$aks_node -it --image=mcr.microsoft.com/cbl-mariner/busybox:2.0
 }
 
 function cluster_analysis() {
