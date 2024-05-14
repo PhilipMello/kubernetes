@@ -108,6 +108,7 @@ function az_aks() {
     echo "8. AKS Enable or Disable Addons"
     echo "9. Enable or Disable CSI storage drivers on an existing cluster"
     echo "10. Get AKS Versions by location"
+    echo "11. AKS Debug Node"
     read option
 
     case $option in
@@ -263,6 +264,9 @@ function az_aks() {
         ;;
     10)
         aks_version_list_location
+        ;;
+    11)
+        az_aks_debug_node
         ;;
     *)
         echo "Invalid choice. Please select 1, 2, 3..."
@@ -1331,6 +1335,18 @@ function az_enable_disable_csi_drivers() {
             echo "Invalid choice"
             ;;
     esac
+}
+
+function az_aks_debug_node () {
+    #
+    echo -e "Microsoft Official Documentation:
+    'https://learn.microsoft.com/en-us/azure/aks/node-access#ssh-using-kubectl-debug'
+    "
+    kubectl get nodes -o wide
+    echo "Choose your node"
+    read aks_node
+
+    kubectl debug node/$aks_node -it --image=mcr.microsoft.com/cbl-mariner/busybox:2.0 && chroot /host
 }
 
 function cluster_analysis() {
