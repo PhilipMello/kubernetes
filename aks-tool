@@ -1350,6 +1350,11 @@ function az_aks_debug_node () {
     kubectl debug node/$aks_node -it --image=mcr.microsoft.com/cbl-mariner/busybox:2.0
 }
 
+function az_aks_get_apiservices () {
+    # Get apivervices
+    kubecetl get apiservices
+}
+
 function cluster_analysis() {
     # AKS Cluster Analysis
     echo "Enter Resource Group:"
