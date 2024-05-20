@@ -13,11 +13,11 @@
 ## Free tools for Kubernetes (k8s)
 
 ```
-wget https://raw.githubusercontent.com/PhilipMello/kubernetes/main/aks-tool && chmod +x aks-tool
+wget https://raw.githubusercontent.com/PhilipMello/kubernetes/main/ktool && chmod +x ktool
 ```
 
 # 📚 Index
-🔖 [AKS Tool](#-aks-tool)<br>
+🔖 [AKS Tool](#-ktool)<br>
 🔖 [Service Principal Name (SPN) RESET](#-service-principal-name-spn-reset)<br>
 🔖 [AKS Cluster State Check](#-aks-cluster-state-check)<br>
 🔖 [MSI SPN Check](#-msi-spn-check)<br>
@@ -26,7 +26,7 @@ wget https://raw.githubusercontent.com/PhilipMello/kubernetes/main/aks-tool && c
 ---
 # 🔧 AKS Tool
 
-![AKS Tool](assets/images/aks-tool.gif)
+![AKS Tool](assets/images/ktool.gif)
 
 ---
 
@@ -35,12 +35,12 @@ wget https://raw.githubusercontent.com/PhilipMello/kubernetes/main/aks-tool && c
 ### Microsoft Official Documentation
 [Update or rotate the credentials for an Azure Kubernetes Service (AKS) cluster | Microsoft Learn](https://learn.microsoft.com/en-us/azure/aks/update-credentials#update-or-create-a-new-service-principal-for-your-aks-cluster "Update or rotate the credentials for an Azure Kubernetes Service (AKS) cluster | Microsoft Learn")
 
-![SPN Reset](assets/images/spn-reset.gif)
+![SPN Reset](assets/images/ktool-spn-reset.gif)
 
 ---
 # 🔧 AKS Cluster State Check
 
-![State Check](assets/images/state-check.gif)
+![State Check](assets/images/ktool-state-check.gif)
 
 ---
 # 🔧 MSI SPN Check
@@ -49,7 +49,7 @@ wget https://raw.githubusercontent.com/PhilipMello/kubernetes/main/aks-tool && c
 [Service principal names | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/ad/service-principal-names "Service principal names | Microsoft Learn")<br>
 [Use a service principal with Azure Kubernetes Service (AKS)](https://learn.microsoft.com/en-us/azure/aks/kubernetes-service-principal?tabs=azure-cli "Use a service principal with Azure Kubernetes Service (AKS) | Microsoft Learn")<br>
 
-![MSI SPN Check](assets/images/msi-spn-check.gif)
+![MSI SPN Check](assets/images/ktool-msi-spn-check.gif)
 
 ---
 # 🔧 AKS Create
