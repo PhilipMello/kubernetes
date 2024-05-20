@@ -450,21 +450,27 @@ function aks_check_top() {
 
 function aks_tcpdump() {
     # Get tcpdump
-    echo -e "Documentation
-    'https://github.com/josecaneira/aks-lab/tree/main/tcpdump_daemonset'
+    echo -e "Microsoft Official Documentation:
+    'https://learn.microsoft.com/en-us/azure/aks/node-access#ssh-using-kubectl-debug'
     "
+    kubectl get nodes -o wide
+    echo "Choose your node"
+    read aks_node
 
-    echo -e "
-    +-------------------------------------------------------------------------+
-    |A PV/PVC file share will be created on the AKS cluster default storage account 
-    |that then can be browsed on your cluster managed Resource Group "MC_" using Azure Portal. 
-    |If no default storage account exists a new one will be created, 
-    |please remember to delete it after it no longer being required.
-    |
-    +-------------------------------------------------------------------------+"
-    kubectl apply -f https://github.com/josecaneira/aks-lab/raw/main/tcpdump_daemonset/tcpdump_ds.yaml
-    kubectl get pv|grep tcpdump
+    echo -e "You can interact with the node session by running ${YELLOW}chroot /host${ENDCOLOR} from the privileged container."
+    
+    kubectl debug node/$aks_node -it --image=mcr.microsoft.com/cbl-mariner/busybox:2.0
 
+    echo -e "Now, run:
+    ${YELLOW}tcpdump -i any -w /tmp/tcpdump.pcap${ENDCOLOR}
+    NOTE: Don't exit the node session.
+    "
+    echo -e "After collect tcpdump logs, run:
+    1.	Open new terminal session and run:
+    2.	Kubectl get pods and replace according to the name of your pod in the command below:
+    kubectl cp node-debugger-aks-nodepool1-XXXXX-vmss000001-XXXXX:/host/tmp ~/tmp
+    "
+    echo -e "Now .pcap file are saved into your local machine and ready to share."
 }
 
 function aks_get_syslog() {
@@ -479,7 +485,6 @@ function aks_get_syslog() {
 	kubectl cp $pod_name:/host/var/log/ /tmp/log
 	zip -r syslog.zip /tmp/log
     echo "Logs has been saved in syslog.zip in the current folder"
-
 }
 
 function aks_get_configmap() {
