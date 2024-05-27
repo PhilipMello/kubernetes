@@ -109,6 +109,7 @@ function az_aks() {
     echo "9. Enable or Disable CSI storage drivers on an existing cluster"
     echo "10. Get AKS Versions by location"
     echo "11. AKS Debug Node"
+    echo "12. Attach ACR to AKS"
     read option
 
     case $option in
@@ -267,6 +268,9 @@ function az_aks() {
         ;;
     11)
         az_aks_debug_node
+        ;;
+    12)
+        az_aks_attach_acr
         ;;
     *)
         echo "Invalid choice. Please select 1, 2, 3..."
@@ -458,7 +462,7 @@ function aks_tcpdump() {
     read aks_node
 
     echo -e "You can interact with the node session by running ${YELLOW}chroot /host${ENDCOLOR} from the privileged container."
-    
+
     kubectl debug node/$aks_node -it --image=mcr.microsoft.com/cbl-mariner/busybox:2.0
 
     echo -e "Now, run:
@@ -1407,6 +1411,16 @@ function az_aks_debug_node () {
 
     echo -e "You can interact with the node session by running ${YELLOW}chroot /host${ENDCOLOR} from the privileged container."
     kubectl debug node/$aks_node -it --image=mcr.microsoft.com/cbl-mariner/busybox:2.0
+}
+
+function az_aks_attach_acr() {
+    echo "Enter Resource Group:"
+    read resource_group
+    echo "Enter Cluster Name:"
+    read cluster_name
+    echo "Enter ACR name:"
+    read acr_name
+    az aks update --resource-group $resource_group --name $cluster_name --attach-acr $acr_name
 }
 
 function az_aks_get_apiservices () {
