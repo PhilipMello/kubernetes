@@ -110,6 +110,7 @@ function az_aks() {
     echo "10. Get AKS Versions by location"
     echo "11. AKS Debug Node"
     echo "12. Attach ACR to AKS"
+    echo "13. Reconcile AKS"
     read option
 
     case $option in
@@ -271,6 +272,9 @@ function az_aks() {
         ;;
     12)
         az_aks_attach_acr
+        ;;
+    13)
+        az_aks_update
         ;;
     *)
         echo "Invalid choice. Please select 1, 2, 3..."
@@ -1426,6 +1430,15 @@ function az_aks_attach_acr() {
 function az_aks_get_apiservices () {
     # Get apivervices
     kubecetl get apiservices
+}
+
+function az_aks_update() {
+    # Reconcile
+    echo "Enter Resource Group:"
+    read resource_group
+    echo "Enter Cluster Name:"
+    read cluster_name
+    az aks update --resource-group $resource_group --name $cluster_name
 }
 
 function cluster_analysis() {
