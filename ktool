@@ -111,6 +111,8 @@ function az_aks() {
     echo "11. AKS Debug Node"
     echo "12. Attach ACR to AKS"
     echo "13. Reconcile AKS"
+    echo "14. Reconcile AKS while exit code equal to 0"
+    echo "15. kubelet logs"
     read option
 
     case $option in
@@ -275,6 +277,12 @@ function az_aks() {
         ;;
     13)
         az_aks_update
+        ;;
+    14)
+        az_aks_reconcile
+        ;;
+    15)
+        az_aks_get_kubelet_logs
         ;;
     *)
         echo "Invalid choice. Please select 1, 2, 3..."
@@ -1439,6 +1447,38 @@ function az_aks_update() {
     echo "Enter Cluster Name:"
     read cluster_name
     az aks update --resource-group $resource_group --name $cluster_name
+}
+
+function az_aks_reconcile() {
+    # Reconcile while exit code NOT 0
+    echo "Enter Resource Group:"
+    read resource_group
+    echo "Enter Cluster Name:"
+    read cluster_name
+
+    command="az aks update --resource-group $resource_group --name $cluster_name"
+    $command
+    exit_code=$?
+
+    while [ $exit_code -ne 0 ]
+    do
+        echo "Reconcile failed with exit code $exit_code. Retrying reconcile in 15 minutes..."
+        sleep 900
+        $command
+        exit_code=$?
+    done
+}
+
+function az_aks_get_kubelet_logs() {
+    # Using kubectl raw
+    echo -e "Microsoft Official Documentation:
+    'https://learn.microsoft.com/en-us/azure/aks/kubelet-logs'
+    "
+    kubectl get nodes
+    echo "Choose your node"
+    read aks_node
+
+    kubectl get --raw "/api/v1/nodes/$aks_node/proxy/logs/messages"|grep kubelet
 }
 
 function cluster_analysis() {
