@@ -669,6 +669,7 @@ function aks_enable_disable_addon() {
     echo "1. Enable or Disable AKS Backup Extension"
     echo "2. Enable or Disable Monitoring logs"
     echo "3. Enable or Disable open-service-mesh addon"
+    echo "4. Enable or Disable Azure Policy"
     echo "Enter your option:"
     read option
 
@@ -853,6 +854,36 @@ function aks_enable_disable_addon() {
             +-------------------------------------------------------------------------+
             "
             az aks disable-addons --resource-group $resource_group --name $cluster_name --addons open-service-mesh
+        else
+            echo "Incorret Option"
+        fi
+        ;;
+    4)
+        3)
+        echo "Enable or Disable Azure Policy addon"
+        echo -e "Microsoft Official documentation: 
+        'https://learn.microsoft.com/en-us/azure/governance/policy/concepts/policy-for-kubernetes'
+        "
+        echo "Choose Option: (1 = Enable / 2 = Disable)"
+        read addons_option
+        echo "Enter Resource Group:"
+        read resource_group
+        echo "Enter Cluster Name:"
+        read cluster_name
+        if [[ "$addons_option" == "1" ]]; then
+            echo -e "
+            +-------------------------------------------------------------------------+
+            |${MAGENTA}Enabling AKS Azure Policy addon${ENDCOLOR}
+            +-------------------------------------------------------------------------+
+            "
+            az aks enable-addons --addons azure-policy --resource-group $resource_group --name $cluster_name
+        elif [[ "$addons_option" == "2" ]]; then
+            echo -e "
+            +-------------------------------------------------------------------------+
+            |${RED}Disabling AKS Azure Policy addon${ENDCOLOR}
+            +-------------------------------------------------------------------------+
+            "
+            az aks enable-addons --addons azure-policy --resource-group $resource_group --name $cluster_name
         else
             echo "Incorret Option"
         fi
