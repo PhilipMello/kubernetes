@@ -113,6 +113,7 @@ function az_aks() {
     echo "13. Reconcile AKS"
     echo "14. Reconcile AKS while exit code equal to 0"
     echo "15. kubelet logs"
+    echo "16. Cancel AKS pending operation (operation-abort)"
     read option
 
     case $option in
@@ -283,6 +284,9 @@ function az_aks() {
         ;;
     15)
         az_aks_get_kubelet_logs
+        ;;
+    16)
+        az_aks_operation_abort
         ;;
     *)
         echo "Invalid choice. Please select 1, 2, 3..."
@@ -1510,6 +1514,19 @@ function az_aks_get_kubelet_logs() {
     read aks_node
 
     kubectl get --raw "/api/v1/nodes/$aks_node/proxy/logs/messages"|grep kubelet
+}
+
+function az_aks_operation_abort() {
+    # Operation Abort
+    echo -e "Microsoft Official Documentation:
+    'https://learn.microsoft.com/en-us/azure/aks/manage-abort-operations?tabs=azure-cli'
+    "
+    echo "Enter Resource Group:"
+    read resource_group
+    echo "Enter Cluster Name:"
+    read cluster_name
+
+    az aks operation-abort --resource-group $resource_group --name $cluster_name
 }
 
 function cluster_analysis() {
