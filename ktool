@@ -25,9 +25,9 @@ echo "
 # Github     : $github2
 # Microsoft  : $microsoft
 # --------------------------------------------------------------
-# How to use: Execute ./aks-tool
+# How to use: Execute ./ktool
 # Exemples:
-# Manual: ./aks-tool -h OR ./aks-tool --h OR ./aks-tool --help
+# Manual: ./ktool -h OR ./ktool --h OR ./ktool --help
 # --------------------------------------------------------------
 "
 WHITE=""
