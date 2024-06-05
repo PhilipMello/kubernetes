@@ -863,7 +863,6 @@ function aks_enable_disable_addon() {
         fi
         ;;
     4)
-        3)
         echo "Enable or Disable Azure Policy addon"
         echo -e "Microsoft Official documentation: 
         'https://learn.microsoft.com/en-us/azure/governance/policy/concepts/policy-for-kubernetes'
