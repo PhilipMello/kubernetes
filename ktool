@@ -993,10 +993,6 @@ function az_vm_run_command() {
 function az_vmss_run_command() {
     echo -e "
     Microsoft Official Documentation: 
-    'https://learn.microsoft.com/en-us/cli/azure/vmss/run-command?view=azure-cli-latest'
-    "
-    echo -e "
-    Microsoft Official Documentation: 
     'https://learn.microsoft.com/en-us/cli/azure/vmss/run-command?view=azure-cli-latest#az-vmss-run-command-invoke'
     "
     echo "Enter MC_Resource Group:"
