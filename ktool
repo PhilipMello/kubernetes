@@ -111,7 +111,7 @@ function az_aks() {
     echo "11. AKS Debug Node"
     echo "12. Attach ACR to AKS"
     echo "13. Reconcile AKS"
-    echo "14. Reconcile AKS while exit code equal to 0"
+    echo "14. Reconcile AKS every 15 minutes"
     echo "15. kubelet logs"
     echo "16. Cancel AKS pending operation (operation-abort)"
     read option
@@ -886,13 +886,13 @@ function aks_enable_disable_addon() {
             |${RED}Disabling AKS Azure Policy addon${ENDCOLOR}
             +-------------------------------------------------------------------------+
             "
-            az aks enable-addons --addons azure-policy --resource-group $resource_group --name $cluster_name
+            az aks disable-addons --addons azure-policy --resource-group $resource_group --name $cluster_name
         else
             echo "Incorret Option"
         fi
         ;;
     *)
-        echo "Invalid choice. Please select 1 or 2."
+        echo "Invalid choice."
         ;;
     esac
 }
@@ -995,49 +995,23 @@ function az_vmss_run_command() {
     Microsoft Official Documentation: 
     'https://learn.microsoft.com/en-us/cli/azure/vmss/run-command?view=azure-cli-latest'
     "
-    echo "1. Run command on vmss"
-    echo "Enter your option:"
-    read option
-
-    case $option in
-    1)
-        echo -e "
-        Microsoft Official Documentation: 
-        'https://learn.microsoft.com/en-us/cli/azure/vmss/run-command?view=azure-cli-latest#az-vmss-run-command-invoke'
-        "
-        echo "Enter MC_Resource Group:"
-        read resource_group
-        echo "Enter Cluster Name:"
-        read cluster_name
-        echo "Enter VMSS ScaleSet Name"
-        read vmss_scaleset
-        echo "Enter VMSS ID"
-        read vmss_id
-        echo -e "Enter your command, Ex: curl -v --connect-timeout 10 --insecure --proxy-insecure https://mcr.microsoft.com/v2/
-        To run commands as a different user, enter sudo -u to specify a user account.
-        "
-        read run_command_invoke
-        az vmss run-command invoke --resource-group $resource_group --name $vmss_scaleset --command-id RunShellScript --instance-id $vmss_id --scripts "$run_command_invoke"
-        ;;
-    2)
-        #az vmss run-command create
-        ;;
-    3)
-        #az vmss run-command delete
-        ;;
-    4)
-        #az vmss run-command list
-        ;;
-    5)
-        #az vmss run-command show
-        ;;
-    6)
-        #az vmss run-command update
-        ;;
-    *)
-        echo "Invalid choice"
-        ;;
-    esac
+    echo -e "
+    Microsoft Official Documentation: 
+    'https://learn.microsoft.com/en-us/cli/azure/vmss/run-command?view=azure-cli-latest#az-vmss-run-command-invoke'
+    "
+    echo "Enter MC_Resource Group:"
+    read resource_group
+    echo "Enter Cluster Name:"
+    read cluster_name
+    echo "Enter VMSS ScaleSet Name"
+    read vmss_scaleset
+    echo "Enter VMSS ID"
+    read vmss_id
+    echo -e "Enter your command, Ex: curl -v --connect-timeout 10 --insecure --proxy-insecure https://mcr.microsoft.com/v2/
+    To run commands as a different user, enter sudo -u to specify a user account.
+    "
+    read run_command_invoke
+    az vmss run-command invoke --resource-group $resource_group --name $vmss_scaleset --command-id RunShellScript --instance-id $vmss_id --scripts "$run_command_invoke"
 }
 
 function az_vmss() {
