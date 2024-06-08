@@ -101,19 +101,21 @@ function az_aks() {
     echo "1. Create AKS Default"
     echo "2. Create AKS with more options (Location, Node-Count, Network-Plugin, Tier, OS-SKU, VM-Size)"
     echo "3. Create Private AKS with more options (Location, Node-Count, Network-Plugin, Tier, OS-SKU, VM-Size)"
-    echo "4. Delete AKS"
-    echo "5. Reset Cluster Service Principal Credentials (SPN)"
-    echo "6. Manually rotate your cluster certificates"
-    echo "7. Upgrade AKS or Nodepool"
-    echo "8. AKS Enable or Disable Addons"
-    echo "9. Enable or Disable CSI storage drivers on an existing cluster"
-    echo "10. Get AKS Versions by location"
-    echo "11. AKS Debug Node"
-    echo "12. Attach ACR to AKS"
-    echo "13. Reconcile AKS"
-    echo "14. Reconcile AKS every 15 minutes"
-    echo "15. kubelet logs"
-    echo "16. Cancel AKS pending operation (operation-abort)"
+    echo "4. Create AKS with Firewall"
+    echo "5. Delete AKS"
+    echo "6. Reset Cluster Service Principal Credentials (SPN)"
+    echo "7. Manually rotate your cluster certificates"
+    echo "8. Upgrade AKS or Nodepool"
+    echo "9. AKS Enable or Disable Addons"
+    echo "10. Enable or Disable CSI storage drivers on an existing cluster"
+    echo "11. Get AKS Versions by location"
+    echo "12. AKS Debug Node"
+    echo "13. Attach ACR to AKS"
+    echo "14. Reconcile AKS"
+    echo "15. Reconcile AKS every 15 minutes"
+    echo "16. kubelet logs"
+    echo "17. Cancel AKS pending operation (operation-abort)"
+    echo "18. Add IP to API Server Authorized IP Range"
     read option
 
     case $option in
@@ -152,7 +154,7 @@ function az_aks() {
         read network_plugin
         echo "Enter Tier:{free, premium, standard}"
         read tier
-        read -p "Enter Kubernetes version, Ex:.(1.27.9, 1.28.3, 1.28.5, 1.29.0, 1.29.2)": kubernetes_version
+        read -p "Enter Kubernetes version, Ex:.(1.27.9, 1.28.3, 1.28.5, 1.29.0, 1.29.2, 1.29.4)": kubernetes_version
         echo "Enter OS SKU:{AzureLinux, CBLMariner, Mariner, Ubuntu}"
         read os_sku
         echo "Enter Node VM Size:{Standard_B2s, Standard_D3_v2, Standard_D16d_v4, standard_ds2_v2}"
@@ -195,7 +197,7 @@ function az_aks() {
         az aks get-credentials --resource-group $resource_group --name $cluster_name --overwrite-existing
         ;;
     3)
-        # Create AKS with options
+        # Create Private AKS with more options
         echo "Enter Resource Group Name:"
         read resource_group
         echo "Enter Cluster Name:"
@@ -250,46 +252,168 @@ function az_aks() {
         az aks get-credentials --resource-group $resource_group --name $cluster_name --overwrite-existing
         ;;
     4)
-        az_aks_delete
+        # Create AKS with Firewall
+        echo -e "Use Azure Firewall to protect Azure Kubernetes Service (AKS) clusters: 
+        'https://learn.microsoft.com/en-us/azure/firewall/protect-azure-kubernetes-service'
+        "
+        echo "Enter Resource Group Name:"
+        read resource_group
+        echo "Enter Cluster Name:"
+        read cluster_name
+        echo "Enter Location:{centralus, eastus, eastus2, swedencentral}"
+        read location
+        echo "Enter Node Count:{1, 2, 3,...}"
+        read node_count
+        echo "Enter Network Plugin:{azure, kubenet, none}"
+        read network_plugin
+        echo "Enter Tier:{free, premium, standard}"
+        read tier
+        read -p "Enter Kubernetes version, Ex:.(1.27.9, 1.28.3, 1.28.5, 1.29.0, 1.29.2, 1.29.4)": kubernetes_version
+        echo "Enter OS SKU:{AzureLinux, CBLMariner, Mariner, Ubuntu}"
+        read os_sku
+        echo "Enter Node VM Size:{Standard_B2s, Standard_D3_v2, Standard_D16d_v4, standard_ds2_v2}"
+        read node_vm_size
+        echo "Enter Managed Identity (MSI) OR Service Princiapl Name (SPN):{msi, spn}"
+        read msi_or_spn
+        echo "Enable Microsoft Entra integration and Azure RBAC for Kubernetes Authorization? Enter (y, n)"
+        read "enable_aad_rbac"
+
+        if [[ "$msi_or_spn" == "msi" ]]; then
+            msi_or_spn="--tags AKS_ManagedCluster=PhilipMelloScriptAutomation"
+        elif [[ "$msi_or_spn" == "spn" ]]; then
+            msi_or_spn="--service-principal --tags AKS_ServicePrincipal=PhilipMelloScriptAutomation"
+        else
+            echo "Invalid input. Please enter MSI or SPN."
+        fi
+
+        if [[ $enable_aad_rbac == [Yy] ]]; then
+            enable_aad_rbac="--enable-aad --enable-azure-rbac"
+        elif [[ $enable_aad_rbac == [Nn] ]]; then
+            enable_aad_rbac=""
+        else
+            echo "Invalid input."
+        fi
+
+        VNET_NAME="${cluster_name}-vnet"
+        AKSSUBNET_NAME="${cluster_name}-subnet"
+        # DO NOT CHANGE FWSUBNET_NAME - This is currently a requirement for Azure Firewall.
+        FWSUBNET_NAME="AzureFirewallSubnet"
+        FWNAME="${cluster_name}-fw"
+        FWPUBLICIP_NAME="${cluster_name}-fwpublicip"
+        FWIPCONFIG_NAME="${cluster_name}-fwconfig"
+        FWROUTE_TABLE_NAME="${cluster_name}-fwrt"
+        FWROUTE_NAME="${cluster_name}-fwrn"
+        FWROUTE_NAME_INTERNET="${cluster_name}-fwinternet"
+
+        # Dedicated virtual network with AKS subnet
+        az network vnet create --resource-group $resource_group --name $VNET_NAME --location $location --address-prefixes 10.42.0.0/16 --subnet-name $AKSSUBNET_NAME --subnet-prefix 10.42.1.0/24
+
+        # Dedicated subnet for Azure Firewall (Firewall name cannot be changed)
+        az network vnet subnet create --resource-group $resource_group --vnet-name $VNET_NAME --name $FWSUBNET_NAME --address-prefix 10.42.2.0/24
+
+        # Create and set up an Azure Firewall with a UDR
+        az network public-ip create -g $resource_group -n $FWPUBLICIP_NAME -l $location --sku "Standard"
+
+        # Install Azure Firewall preview CLI extension
+        az extension add --name azure-firewall
+
+        echo -e "
+        +-------------------------------------------------------------------------+
+        |${MAGENTA}Deploying Azure Firewall${ENDCOLOR}
+        +-------------------------------------------------------------------------+
+        "
+        # Deploy Azure Firewall
+        az network firewall create -g $resource_group -n $FWNAME -l $location --enable-dns-proxy true
+
+        # Configure Firewall IP Config
+        az network firewall ip-config create -g $resource_group -f $FWNAME -n $FWIPCONFIG_NAME --public-ip-address $FWPUBLICIP_NAME --vnet-name $VNET_NAME
+
+        # Capture Firewall IP Address for Later Use
+        FWPUBLIC_IP=$(az network public-ip show -g $resource_group -n $FWPUBLICIP_NAME --query "ipAddress" -o tsv)
+        FWPRIVATE_IP=$(az network firewall show -g $resource_group -n $FWNAME --query "ipConfigurations[0].privateIPAddress" -o tsv)
+
+        # Create UDR and add a route for Azure Firewall
+        az network route-table create -g $resource_group -l $location --name $FWROUTE_TABLE_NAME
+        az network route-table route create -g $resource_group --name $FWROUTE_NAME --route-table-name $FWROUTE_TABLE_NAME --address-prefix 0.0.0.0/0 --next-hop-type VirtualAppliance --next-hop-ip-address $FWPRIVATE_IP
+        az network route-table route create -g $resource_group --name $FWROUTE_NAME_INTERNET --route-table-name $FWROUTE_TABLE_NAME --address-prefix $FWPUBLIC_IP/32 --next-hop-type Internet
+
+        # Adding firewall rules
+        az network firewall network-rule create -g $resource_group -f $FWNAME --collection-name 'aksfwnr' -n 'apiudp' --protocols 'UDP' --source-addresses '*' --destination-addresses "AzureCloud.$location" --destination-ports 1194 --action allow --priority 100
+        az network firewall network-rule create -g $resource_group -f $FWNAME --collection-name 'aksfwnr' -n 'apitcp' --protocols 'TCP' --source-addresses '*' --destination-addresses "AzureCloud.$location" --destination-ports 9000
+        az network firewall network-rule create -g $resource_group -f $FWNAME --collection-name 'aksfwnr' -n 'time' --protocols 'UDP' --source-addresses '*' --destination-fqdns 'ntp.ubuntu.com' --destination-ports 123
+
+        # Add FW Application Rules
+        az network firewall application-rule create -g $resource_group -f $FWNAME --collection-name 'aksfwar' -n 'fqdn' --source-addresses '*' --protocols 'http=80' 'https=443' --fqdn-tags "AzureKubernetesService" --action allow --priority 100
+
+        # Associate route table with next hop to Firewall to the AKS subnet
+        az network vnet subnet update -g $resource_group --vnet-name $VNET_NAME --name $AKSSUBNET_NAME --route-table $FWROUTE_TABLE_NAME
+
+        # Deploy AKS with outbound type of UDR to the existing network
+        SUBNETID=$(az network vnet subnet show -g $resource_group --vnet-name $VNET_NAME --name $AKSSUBNET_NAME --query id -o tsv)
+
+        # Retrieve your IP address
+        CURRENT_IP=$(dig @resolver1.opendns.com ANY myip.opendns.com +short)
+
+        echo -e "
+        +-------------------------------------------------------------------------+
+        |${MAGENTA}Creating AKS with Firewall${ENDCOLOR}
+        +-------------------------------------------------------------------------+
+        "  
+        az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --kubernetes-version $kubernetes_version --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn $enable_aad_rbac --outbound-type userDefinedRouting --vnet-subnet-id $SUBNETID  --api-server-authorized-ip-ranges $FWPUBLIC_IP $CURRENT_IP/32
+        echo -e "
+        +-------------------------------------------------------------------------+
+        |${GREEN}AKS with Firewall Created${ENDCOLOR}
+        |Resource Group: $resource_group || Cluster Name: $cluster_name
+        +-------------------------------------------------------------------------+
+        |$(aks_get_url)
+        +-------------------------------------------------------------------------+
+        "  
+        az aks get-credentials --resource-group $resource_group --name $cluster_name --overwrite-existing
         ;;
     5)
-        az_aks_reset_spn_credentials
+        az_aks_delete
         ;;
     6)
-        az_aks_rotate_certs
+        az_aks_reset_spn_credentials
         ;;
     7)
+        az_aks_rotate_certs
+        ;;
+    8)
         az_aks_update_upgrade
         ;;
     8)
         aks_enable_disable_addon
         ;;
-    9)
+    10)
         az_enable_disable_csi_drivers
         ;;
-    10)
+    11)
         aks_version_list_location
         ;;
-    11)
+    12)
         az_aks_debug_node
         ;;
-    12)
+    13)
         az_aks_attach_acr
         ;;
-    13)
+    14)
         az_aks_update
         ;;
-    14)
+    15)
         az_aks_reconcile
         ;;
-    15)
+    16)
         az_aks_get_kubelet_logs
         ;;
-    16)
+    17)
         az_aks_operation_abort
         ;;
+    18)
+        az_aks_api_server_authorized_ip
+        ;;
     *)
-        echo "Invalid choice. Please select 1, 2, 3..."
+        echo "Invalid choice. Please select 1 to 17"
         ;;
     esac
 }
@@ -1496,6 +1620,25 @@ function az_aks_operation_abort() {
     read cluster_name
 
     az aks operation-abort --resource-group $resource_group --name $cluster_name
+}
+
+function az_aks_api_server_authorized_ip() {
+    # Add to AKS approved list
+    CURRENT_IP=$(dig @resolver1.opendns.com ANY myip.opendns.com +short)
+    echo -e "
+    ${GREEN}Your current IP: $CURRENT_IP${ENDCOLOR}
+    "
+    echo "Enter Resource Group:"
+    read resource_group
+    echo "Enter Cluster Name:"
+    read cluster_name
+    echo -e "Enter IP to add to authorized IP ranges
+    Example: 1.1.1.1,2.2.2.2,3.3.3.3
+    "
+    read ip_to_add
+
+    FWPUBLIC_IP=$(az network public-ip show --resource-group $resource_group --name $cluster_name-fwpublicip --query "ipAddress" -o tsv)
+    az aks update --resource-group $resource_group --name $cluster_name --api-server-authorized-ip-ranges $FWPUBLIC_IP,$ip_to_add
 }
 
 function cluster_analysis() {
