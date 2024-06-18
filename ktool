@@ -276,7 +276,8 @@ function az_aks() {
         read node_count
         echo "Enter Network Plugin:{azure, kubenet, none}"
         read network_plugin
-        echo "Enter Tier:{free, premium, standard}"
+        echo "Enter AKS Tier:{free, premium, standard}"
+        echo "Free TIER IS NOT recommended for production"
         read tier
         read -p "Enter Kubernetes version, Ex:.(1.27.9, 1.28.3, 1.28.5, 1.29.0, 1.29.2, 1.29.4)": kubernetes_version
         echo "Enter OS SKU:{AzureLinux, CBLMariner, Mariner, Ubuntu}"
@@ -287,11 +288,11 @@ function az_aks() {
         read msi_or_spn
         echo "Enable Microsoft Entra integration and Azure RBAC for Kubernetes Authorization? Enter (y, n)"
         read "enable_aad_rbac"
-        echo -e "Enter your Firewall SKU
+        echo -e "Enter your Firewall TIER
         {Basic, Standard, Premium}
         'https://learn.microsoft.com/en-us/azure/firewall/choose-firewall-sku'
         "
-        read fwsku
+        read fwtier
 
         if [[ "$msi_or_spn" == "msi" ]]; then
             msi_or_spn="--tags AKS_ManagedCluster=PhilipMelloScriptAutomation"
@@ -332,7 +333,7 @@ function az_aks() {
         az network vnet subnet create --resource-group $resource_group --vnet-name $VNET_NAME --name $FWSUBNET_NAME --address-prefix 10.42.2.0/24
 
         # Create and set up an Azure Firewall with a UDR
-        az network public-ip create --resource-group $resource_group --name $FWPUBLICIP_NAME --location $location --sku $fwsku
+        az network public-ip create --resource-group $resource_group --name $FWPUBLICIP_NAME --location $location --sku $fwtier
 
         # Install Azure Firewall preview CLI extension
         az extension add --name azure-firewall
@@ -344,7 +345,7 @@ function az_aks() {
         +--------------------------------------------------------+
         "
         # Deploy Azure Firewall
-        az network firewall create --resource-group $resource_group --name $FWNAME --location $location --enable-dns-proxy true --sku $fwsku
+        az network firewall create --resource-group $resource_group --name $FWNAME --location $location --enable-dns-proxy true --tier $fwtier
 
         echo -e "
         +-------------------------------------------------------------------+
@@ -385,7 +386,7 @@ function az_aks() {
         |${MAGENTA}Creating AKS with Firewall${ENDCOLOR}
         +-------------------------------------------------------------------------+
         "  
-        az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --kubernetes-version $kubernetes_version --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn $enable_aad_rbac --outbound-type userDefinedRouting --vnet-subnet-id $SUBNETID  --api-server-authorized-ip-ranges $FWPUBLIC_IP $CURRENT_IP/32
+        az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --kubernetes-version $kubernetes_version --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn $enable_aad_rbac --outbound-type userDefinedRouting --vnet-subnet-id $SUBNETID  --api-server-authorized-ip-ranges $FWPUBLIC_IP
         echo -e "
         +-------------------------------------------------------------------------+
         |${GREEN}AKS with Firewall Created${ENDCOLOR}
