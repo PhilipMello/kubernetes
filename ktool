@@ -126,6 +126,7 @@ function az_aks() {
     echo "16. kubelet logs"
     echo "17. Cancel AKS pending operation (operation-abort)"
     echo "18. Add IP to API Server Authorized IP Range"
+    echo "19. Create Firewall Rules for AKS"
     read option
 
     case $option in
@@ -439,8 +440,11 @@ function az_aks() {
     18)
         az_aks_api_server_authorized_ip
         ;;
+    19)
+        az_aks_firewall
+        ;;
     *)
-        echo "Invalid choice. Please select 1 to 17"
+        echo "Invalid choice. Please select 1 to 19"
         ;;
     esac
 }
@@ -1666,6 +1670,65 @@ function az_aks_api_server_authorized_ip() {
 
     FWPUBLIC_IP=$(az network public-ip show --resource-group $resource_group --name $cluster_name-fwpublicip --query "ipAddress" -o tsv)
     az aks update --resource-group $resource_group --name $cluster_name --api-server-authorized-ip-ranges $FWPUBLIC_IP,$ip_to_add
+}
+
+function az_aks_firewall() {
+    # Create AKS with Firewall
+    echo -e "Use Azure Firewall to protect Azure Kubernetes Service (AKS) clusters: 
+    'https://learn.microsoft.com/en-us/azure/firewall/protect-azure-kubernetes-service'
+    "
+    echo -e "
+    +------------------------------------------------+
+    |${MAGENTA}Firewall Rules for AKS${ENDCOLOR}
+    +------------------------------------------------+
+    "
+    echo "Enter Resource Group Name:"
+    read resource_group
+    echo "Enter Firewall Public IP Name:"
+    read FWPUBLICIP_NAME
+    echo "Enter Firewall Name:"
+    read FWNAME
+    echo "Enter Location:{centralus, eastus, eastus2, swedencentral}"
+    read location
+
+    # DO NOT CHANGE FWSUBNET_NAME - This is currently a requirement for Azure Firewall.
+    FWSUBNET_NAME="AzureFirewallSubnet"
+    FWNAME="${cluster_name}-fw"
+    FWPUBLICIP_NAME="${cluster_name}-fwpublicip"
+    FWIPCONFIG_NAME="${cluster_name}-fwconfig"
+    FWROUTE_TABLE_NAME="${cluster_name}-fwrt"
+    FWROUTE_NAME="${cluster_name}-fwrn"
+    FWROUTE_NAME_INTERNET="${cluster_name}-fwinternet"
+    echo -e "
+    +------------------------------------------------+
+    |${MAGENTA}Creating AKS Firewall Rules${ENDCOLOR}
+    +------------------------------------------------+
+    "
+    # Capture Firewall IP Address for Later Use
+    FWPUBLIC_IP=$(az network public-ip show -g $resource_group -n $FWPUBLICIP_NAME --query "ipAddress" -o tsv)
+    FWPRIVATE_IP=$(az network firewall show -g $resource_group -n $FWNAME --query "ipConfigurations[0].privateIPAddress" -o tsv)
+
+    # Create UDR and add a route for Azure Firewall
+    az network route-table create --resource-group $resource_group --location $location --name $FWROUTE_TABLE_NAME
+    az network route-table route create --resource-group $resource_group --name $FWROUTE_NAME --route-table-name $FWROUTE_TABLE_NAME --address-prefix 0.0.0.0/0 --next-hop-type VirtualAppliance --next-hop-ip-address $FWPRIVATE_IP
+    az network route-table route create --resource-group $resource_group --name $FWROUTE_NAME_INTERNET --route-table-name $FWROUTE_TABLE_NAME --address-prefix $FWPUBLIC_IP/32 --next-hop-type Internet
+
+    # Add FW Network Rules
+    az network firewall network-rule create --resource-group $resource_group -f $FWNAME --collection-name 'aksfwnr' -n 'apiudp' --protocols 'UDP' --source-addresses '*' --destination-addresses "AzureCloud.$location" --destination-ports 1194 --action allow --priority 100
+    az network firewall network-rule create --resource-group $resource_group -f $FWNAME --collection-name 'aksfwnr' -n 'apitcp' --protocols 'TCP' --source-addresses '*' --destination-addresses "AzureCloud.$location" --destination-ports 9000
+    az network firewall network-rule create --resource-group $resource_group -f $FWNAME --collection-name 'aksfwnr' -n 'time' --protocols 'UDP' --source-addresses '*' --destination-fqdns 'ntp.ubuntu.com' --destination-ports 123
+
+    # Add FW Application Rules
+    az network firewall application-rule create --resource-group $resource_group -f $FWNAME --collection-name 'aksfwar' -n 'fqdn' --source-addresses '*' --protocols 'http=80' 'https=443' --fqdn-tags "AzureKubernetesService" --action allow --priority 100
+
+    # Retrieve your IP address
+    CURRENT_IP=$(dig @resolver1.opendns.com ANY myip.opendns.com +short)
+
+    echo -e "
+    +------------------------------------------------+
+    |${GREEN}ASK Firewall Rules Added${ENDCOLOR}
+    +------------------------------------------------+
+    "  
 }
 
 function cluster_analysis() {
