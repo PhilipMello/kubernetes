@@ -1111,8 +1111,44 @@ function az_cli_tools(){
         +-------------------------------------------------------------------------+
         "
         ;;
+    4)
+        echo -e "Git Official Documentation: 
+        'https://git-scm.com/download/linux'
+        "
+        echo "Install Git"
+        echo -e "
+        +-------------------------------------------------------------------------+
+        |${MAGENTA}Installing Git${ENDCOLOR}
+        +-------------------------------------------------------------------------+
+        "
+        apt install -y git
+        echo -e "
+        +-------------------------------------------------------------------------+
+        |${GREEN}Git Installed${ENDCOLOR}
+        +-------------------------------------------------------------------------+
+        "  
+        ;;
+    5)
+        echo -e "Git Official Documentation: 
+        'https://git-scm.com/download/linux'
+        "
+        echo "Install Ubuntu Packages"
+        echo -e "
+        +-------------------------------------------------------------------------+
+        |${MAGENTA}Installing Ubuntu Packages${ENDCOLOR}
+        +-------------------------------------------------------------------------+
+        "
+        apt install -y sudo wget curl nano grep mtr jq htop btop p7zip dnsutils && \
+        apt install -y dnsmasq-utils bind*-utils tcpdump iperf3 ntpdate ipcalc sipcalc libsctp1 rsync stow nmap netcat-openbsd lnav git && \
+        wget https://raw.githubusercontent.com/PhilipMello/kubernetes/main/ktool && chmod +x ktool && sudo mv ktool /usr/bin
+        echo -e "
+        +-------------------------------------------------------------------------+
+        |${GREEN}Ubuntu Packages Installed${ENDCOLOR}
+        +-------------------------------------------------------------------------+
+        "  
+        ;;
     *)
-         echo "Invalid choice. Please select 1, 2 or 3."
+         echo "Invalid choice. Please select 1 to 5."
         ;;
     esac
 }
@@ -1729,6 +1765,79 @@ function az_aks_firewall() {
     |${GREEN}ASK Firewall Rules Added${ENDCOLOR}
     +------------------------------------------------+
     "  
+}
+
+function az_aks_firewall_associate() {
+    # Create AKS and associate with Azure Firewall
+    echo -e "Use Azure Firewall to protect Azure Kubernetes Service (AKS) clusters: 
+    'https://learn.microsoft.com/en-us/azure/firewall/protect-azure-kubernetes-service'
+    "
+    # Deploy AKS with outbound type of UDR to the existing network
+    echo "Enter VNET Name:"
+    read VNET_NAME
+    echo "Enter Subnet Name:"
+    read AKSSUBNET_NAME
+
+    # Retrieve your Subnet ID
+    SUBNETID=$(az network vnet subnet show --resource-group $resource_group --vnet-name $VNET_NAME --name $AKSSUBNET_NAME --query id -o tsv)
+
+    # Retrieve your IP address
+    CURRENT_IP=$(dig @resolver1.opendns.com ANY myip.opendns.com +short)
+    
+    # Create AKS with options
+    echo "Enter Resource Group Name:"
+    read resource_group
+    echo "Enter Cluster Name:"
+    read cluster_name
+    echo "Enter Location:{centralus, eastus, eastus2, swedencentral}"
+    read location
+    echo "Enter Node Count:{1, 2, 3,...}"
+    read node_count
+    echo "Enter Network Plugin:{azure, kubenet, none}"
+    read network_plugin
+    echo "Enter Tier:{free, premium, standard}"
+    read tier
+    read -p "Enter Kubernetes version, Ex:.(1.27.9, 1.28.3, 1.28.5, 1.29.0, 1.29.2, 1.29.4)": kubernetes_version
+    echo "Enter OS SKU:{AzureLinux, CBLMariner, Mariner, Ubuntu}"
+    read os_sku
+    echo "Enter Node VM Size:{Standard_B2s, Standard_D3_v2, Standard_D16d_v4, standard_ds2_v2}"
+    read node_vm_size
+    echo "Enter Managed Identity (MSI) OR Service Princiapl Name (SPN):{msi, spn}"
+    read msi_or_spn
+    echo "Enable Microsoft Entra integration and Azure RBAC for Kubernetes Authorization? Enter (y, n)"
+    read "enable_aad_rbac"
+
+    if [[ "$msi_or_spn" == "msi" ]]; then
+        msi_or_spn="--tags AKS_ManagedCluster=PhilipMelloScriptAutomation"
+    elif [[ "$msi_or_spn" == "spn" ]]; then
+        msi_or_spn="--service-principal --tags AKS_ServicePrincipal=PhilipMelloScriptAutomation"
+    else
+        echo "Invalid input. Please enter MSI or SPN."
+    fi
+
+    if [[ $enable_aad_rbac == [Yy] ]]; then
+        enable_aad_rbac="--enable-aad --enable-azure-rbac"
+    elif [[ $enable_aad_rbac == [Nn] ]]; then
+        enable_aad_rbac=""
+    else
+        echo "Invalid input."
+    fi
+
+    echo -e "
+    +-------------------------------------------------------------------------+
+    |${MAGENTA}AKS Creating${ENDCOLOR}
+    +-------------------------------------------------------------------------+
+    "  
+    az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --kubernetes-version $kubernetes_version --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn $enable_aad_rbac --outbound-type userDefinedRouting --vnet-subnet-id $SUBNETID --api-server-authorized-ip-ranges $CURRENT_IP
+    echo -e "
+    +-------------------------------------------------------------------------+
+    |${GREEN}AKS Created${ENDCOLOR}
+    |Resource Group: $resource_group || Cluster Name: $cluster_name
+    +-------------------------------------------------------------------------+
+    |$(aks_get_url)
+    +-------------------------------------------------------------------------+
+    "  
+    az aks get-credentials --resource-group $resource_group --name $cluster_name --overwrite-existing
 }
 
 function cluster_analysis() {
