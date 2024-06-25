@@ -441,7 +441,7 @@ function az_aks() {
         az_aks_api_server_authorized_ip
         ;;
     19)
-        az_aks_firewall
+        az_aks_firewall_rules
         ;;
     *)
         echo "Invalid choice. Please select 1 to 19"
@@ -1064,15 +1064,15 @@ function az_cli_tools(){
         'https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt'
         "
         echo -e "
-        +-------------------------------------------------------------------------+
+        +-------------------------------------------------------+
         |${MAGENTA}Installing az-cli${ENDCOLOR}
-        +-------------------------------------------------------------------------+
+        +-------------------------------------------------------+
         "
         curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
         echo -e "
-        +-------------------------------------------------------------------------+
+        +-------------------------------------------------------+
         |${GREEN}az-cli Installed${ENDCOLOR}
-        +-------------------------------------------------------------------------+
+        +-------------------------------------------------------+
         "
         ;;
     2)
@@ -1080,15 +1080,15 @@ function az_cli_tools(){
         'https://learn.microsoft.com/en-us/cli/azure/aks?view=azure-cli-latest#az-aks-install-cli'
         "
         echo -e "
-        +-------------------------------------------------------------------------+
+        +-------------------------------------------------------+
         |${MAGENTA}Installing kubectl${ENDCOLOR}
-        +-------------------------------------------------------------------------+
+        +-------------------------------------------------------+
         "
         az aks install-cli
         echo -e "
-        +-------------------------------------------------------------------------+
+        +-------------------------------------------------------+
         |${GREEN}kubectl Installed${ENDCOLOR}
-        +-------------------------------------------------------------------------+
+        +-------------------------------------------------------+
         "
         ;;
     3)
@@ -1098,53 +1098,62 @@ function az_cli_tools(){
         "
         echo "Install helm"
         echo -e "
-        +-------------------------------------------------------------------------+
+        +-------------------------------------------------------+
         |${MAGENTA}Installing helm${ENDCOLOR}
-        +-------------------------------------------------------------------------+
+        +-------------------------------------------------------+
         "
         wget https://get.helm.sh/helm-v3.14.3-linux-amd64.tar.gz
         tar -zxvf helm-v3.14.3-linux-amd64.tar.gz
         sudo mv linux-amd64/helm /usr/local/bin/helm
         echo -e "
-        +-------------------------------------------------------------------------+
+        +-------------------------------------------------------+
         |${GREEN}helm Installed${ENDCOLOR}
-        +-------------------------------------------------------------------------+
+        +-------------------------------------------------------+
         "
         ;;
     4)
-        echo -e "Git Official Documentation: 
-        'https://git-scm.com/download/linux'
+        echo -e "Docker Official Documentation: 
+        'https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository'
         "
-        echo "Install Git"
+        echo "Install Docker Engine on Ubuntu"
         echo -e "
-        +-------------------------------------------------------------------------+
-        |${MAGENTA}Installing Git${ENDCOLOR}
-        +-------------------------------------------------------------------------+
+        +-------------------------------------------------------+
+        |${MAGENTA}Installing Docker Engine${ENDCOLOR}
+        +-------------------------------------------------------+
         "
-        apt install -y git
+        sudo apt-get update
+        sudo apt-get install ca-certificates curl
+        sudo install -m 0755 -d /etc/apt/keyrings
+        sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+        sudo chmod a+r /etc/apt/keyrings/docker.asc
+        # Add the repository to Apt sources:
+        echo \
+        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+        $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+        sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        sudo apt-get update
+        sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
         echo -e "
-        +-------------------------------------------------------------------------+
-        |${GREEN}Git Installed${ENDCOLOR}
-        +-------------------------------------------------------------------------+
-        "  
+        +-------------------------------------------------------+
+        |${GREEN}Docker Engine Installed${ENDCOLOR}
+        +-------------------------------------------------------+
+        "
+        docker --version  
         ;;
     5)
-        echo -e "Git Official Documentation: 
-        'https://git-scm.com/download/linux'
-        "
         echo "Install Ubuntu Packages"
         echo -e "
-        +-------------------------------------------------------------------------+
+        +-------------------------------------------------------+
         |${MAGENTA}Installing Ubuntu Packages${ENDCOLOR}
-        +-------------------------------------------------------------------------+
+        +-------------------------------------------------------+
         "
         apt install -y sudo wget curl nano grep mtr jq htop btop p7zip dnsutils && \
         apt install -y dnsmasq-utils bind*-utils tcpdump iperf3 ntpdate ipcalc sipcalc libsctp1 rsync stow nmap netcat-openbsd lnav git && \
         wget https://raw.githubusercontent.com/PhilipMello/kubernetes/main/ktool && chmod +x ktool && sudo mv ktool /usr/bin
         echo -e "
-        +-------------------------------------------------------------------------+
+        +-------------------------------------------------------+
         |${GREEN}Ubuntu Packages Installed${ENDCOLOR}
-        +-------------------------------------------------------------------------+
+        +-------------------------------------------------------+
         "  
         ;;
     *)
@@ -1708,8 +1717,8 @@ function az_aks_api_server_authorized_ip() {
     az aks update --resource-group $resource_group --name $cluster_name --api-server-authorized-ip-ranges $FWPUBLIC_IP,$ip_to_add
 }
 
-function az_aks_firewall() {
-    # Create AKS with Firewall
+function az_aks_firewall_rules() {
+    # Create Rules for AKS with Firewall
     echo -e "Use Azure Firewall to protect Azure Kubernetes Service (AKS) clusters: 
     'https://learn.microsoft.com/en-us/azure/firewall/protect-azure-kubernetes-service'
     "
@@ -1757,14 +1766,11 @@ function az_aks_firewall() {
     # Add FW Application Rules
     az network firewall application-rule create --resource-group $resource_group -f $FWNAME --collection-name 'aksfwar' -n 'fqdn' --source-addresses '*' --protocols 'http=80' 'https=443' --fqdn-tags "AzureKubernetesService" --action allow --priority 100
 
-    # Retrieve your IP address
-    CURRENT_IP=$(dig @resolver1.opendns.com ANY myip.opendns.com +short)
-
     echo -e "
     +------------------------------------------------+
     |${GREEN}ASK Firewall Rules Added${ENDCOLOR}
     +------------------------------------------------+
-    "  
+    " 
 }
 
 function az_aks_firewall_associate() {
@@ -1777,6 +1783,11 @@ function az_aks_firewall_associate() {
     read VNET_NAME
     echo "Enter Subnet Name:"
     read AKSSUBNET_NAME
+    echo "Enter Firewall Public IP Name:"
+    read FWPUBLICIP_NAME
+
+    # Capture Firewall IP Address for Later Use
+    FWPUBLIC_IP=$(az network public-ip show -g $resource_group -n $FWPUBLICIP_NAME --query "ipAddress" -o tsv)
 
     # Retrieve your Subnet ID
     SUBNETID=$(az network vnet subnet show --resource-group $resource_group --vnet-name $VNET_NAME --name $AKSSUBNET_NAME --query id -o tsv)
@@ -1784,7 +1795,7 @@ function az_aks_firewall_associate() {
     # Retrieve your IP address
     CURRENT_IP=$(dig @resolver1.opendns.com ANY myip.opendns.com +short)
     
-    # Create AKS with options
+    # AKS Options
     echo "Enter Resource Group Name:"
     read resource_group
     echo "Enter Cluster Name:"
@@ -1827,8 +1838,11 @@ function az_aks_firewall_associate() {
     +-------------------------------------------------------------------------+
     |${MAGENTA}AKS Creating${ENDCOLOR}
     +-------------------------------------------------------------------------+
-    "  
-    az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --kubernetes-version $kubernetes_version --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn $enable_aad_rbac --outbound-type userDefinedRouting --vnet-subnet-id $SUBNETID --api-server-authorized-ip-ranges $CURRENT_IP
+    "
+    # Install Azure Firewall preview CLI extension
+    az extension add --name azure-firewall
+
+    az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --kubernetes-version $kubernetes_version --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn $enable_aad_rbac --outbound-type userDefinedRouting --vnet-subnet-id $SUBNETID --api-server-authorized-ip-ranges $FWPUBLICIP_NAME,$CURRENT_IP
     echo -e "
     +-------------------------------------------------------------------------+
     |${GREEN}AKS Created${ENDCOLOR}
