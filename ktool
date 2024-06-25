@@ -2,7 +2,7 @@
 # Author
 author="Philip Mello <@Microsoft>"
 # Version
-version="1.0"
+version="1.1"
 # License
 license="MIT"
 # Date
@@ -14,16 +14,19 @@ github2='https://github.com/AtomyCloud/kubernetes'
 microsoft=''
 AKS_Kubernetes_release_calendar='https://learn.microsoft.com/en-us/azure/aks/supported-kubernetes-versions?tabs=azure-cli#aks-kubernetes-release-calendar'
 echo "
-# --------------------------------------------------------------
-# Script     : Microsoft Azure AKS Script Automation
-# Description: Create, Delete, Check, Fix. Azure AKS Cluster
-# Version    : $version
-# Date       : $current_date
-# Author     : $author
-# License    : $license
-# Github     : $github
-# Github     : $github2
-# Microsoft  : $microsoft
+ _ _______          _ 
+| |__   __|        | |  # Script     : Microsoft Azure AKS Script Automation
+| | _| | ___   ___ | |  # Description: Create, Delete, Check, Fix. Azure AKS Cluster
+| |/ / |/ _ \ / _ \| |  # Version    : $version
+|   <| | (_) | (_) | |  # Date       : $current_date
+|_|\_\_|\___/ \___/|_|  # Author     : $author
+
+          _  __ _____ 
+    /\   | |/ // ____|  # License    : $license
+   /  \  | ' /| (___    # Github     : $github
+  / /\ \ |  <  \___ \   # Github     : $github2
+ / ____ \| . \ ____) |  # Microsoft  : $microsoft
+/_/    \_\_|\_\_____/ 
 # --------------------------------------------------------------
 # How to use: Execute ./ktool
 # Exemples:
@@ -64,7 +67,7 @@ function az_resource_group() {
             +-------------------------------------------------------------------------+
             "
             az group create --name $resource_group --location $location --tags $tags
-            exit 110
+            #exit 110
             ;;
         2)
             echo "Delete Resource Group"
@@ -76,23 +79,23 @@ function az_resource_group() {
             +-------------------------------------------------------------------------+
             "
             az group delete --name $resource_group
-            exit 120
+            #exit 120
             ;;
         3)
             echo "Force Delete Resource Group"
             echo "Enter Resource Group Name:"
             read resource_group
             az group delete --name $resource_group --force-deletion-types Microsoft.Compute/virtualMachines
-            exit 130
+            #exit 130
             ;;
         4)
             echo "Check if a Resource Group exists"
             echo "Enter Resource Group Name:"
             read resource_group
             az group exists --name $resource_group
-            if [ $? -eq 0 ]; then
-                exit 140
-            fi
+            #if [ $? -eq 0 ]; then
+            #    exit 140
+            #fi
             ;;
         *)
             echo "Invalid option"
