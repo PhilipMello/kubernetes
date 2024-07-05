@@ -1738,7 +1738,7 @@ function az_aks_update() {
     read resource_group
     echo "Enter Cluster Name:"
     read cluster_name
-    
+
     echo -e "
     +--------------------------------------------------------+
     |${MAGENTA}Performing Reconcile on AKS${ENDCOLOR}
@@ -1754,6 +1754,17 @@ function az_aks_reconcile() {
     read resource_group
     echo "Enter Cluster Name:"
     read cluster_name
+    
+    provisioning_state=$(az aks show --resource-group $resource_group --name $cluster_name --query provisioningState -o tsv)
+    if [[ "$provisioning_state" == "Succeeded" ]]; then
+        echo -e "
+    +--------------------------------------------------------+
+    |${GREEN}AKS is in Succeeded State${ENDCOLOR}
+    |No reconcile necessary.
+    +--------------------------------------------------------+
+    "
+        exit
+    fi
 
     echo -e "
     +--------------------------------------------------------+
