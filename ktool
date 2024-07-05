@@ -1250,6 +1250,47 @@ function az_vmss_run_command() {
     az vmss run-command invoke --resource-group $resource_group --name $vmss_scaleset --command-id RunShellScript --instance-id $vmss_id --scripts "$run_command_invoke"
 }
 
+function az_vmss_update() {
+    echo -e "
+    Microsoft Official Documentation: 
+    'https://learn.microsoft.com/en-us/cli/azure/vmss?view=azure-cli-latest#az-vmss-update'
+    "
+    echo -e "--automatic-repairs-action
+    Type of repair action that will be used for repairing unhealthy virtual machines in the scale set.
+    Accepted values: Reimage, Replace, Restart
+    "
+    echo "Enter one of the following options:"
+    echo "1. Reimage"
+    echo "2. Replace"
+    echo "3. Restart"
+    read $option
+
+    if [[ "$option" == "1" ]]; then
+        vmss_command="--automatic-repairs-action reimage"
+    elif [[ "$opton" == "2" ]]; then
+        vmss_command="--automatic-repairs-action replace"
+    elif [[ "$opton" == "3" ]]; then
+        vmss_command="--automatic-repairs-action restart"
+    else
+        echo "Invalid input. Please 1 to 3"
+    fi
+
+    echo "Enter MC_Resource Group:"
+    read resource_group
+    echo "Enter Cluster Name:"
+    read cluster_name
+    echo "Enter VMSS ScaleSet Name"
+    read vmss_scaleset
+
+    echo -e "
+    +--------------------------------------------------------+
+    |${MAGENTA}Performing updating on VMSS $vmss_scaleset${ENDCOLOR}
+    |This process can take up to 15 minutes
+    +--------------------------------------------------------+
+    "
+    az vmss update --resource-group $resource_group --name $vmss_scaleset $vmss_command
+}
+
 function az_vmss() {
     echo "1. vmss delete-instances"
     echo "2. vmss deallocate"
@@ -1260,7 +1301,8 @@ function az_vmss() {
     echo "7. vmss list-skus"
     echo "8. vmss perform-maintenance"
     echo "9. vmss reimage"
-    echo "21. az vmss run-command"
+    echo "21. vmss update"
+    echo "22. az vmss run-command"
     echo "Enter your option:"
     read option
     echo -e "
@@ -1477,6 +1519,9 @@ function az_vmss() {
         #az vmss wait --created --name MyScaleSet --resource-group MyResourceGroup
         ;;
     21)
+        az_vmss_update
+        ;;
+    22)
         az_vmss_run_command
         ;;
     *)
