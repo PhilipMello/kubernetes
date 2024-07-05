@@ -1730,11 +1730,21 @@ function az_aks_get_apiservices () {
 }
 
 function az_aks_update() {
-    # Reconcile
+    # Reconcile the cluster back to its current state.
+    echo -e "Microsoft Official Documentation:
+    'https://learn.microsoft.com/en-us/cli/azure/aks?view=azure-cli-latest#az-aks-update-examples'
+    "
     echo "Enter Resource Group:"
     read resource_group
     echo "Enter Cluster Name:"
     read cluster_name
+    
+    echo -e "
+    +--------------------------------------------------------+
+    |${MAGENTA}Performing Reconcile on AKS${ENDCOLOR}
+    |This process can take up to 15 minutes
+    +--------------------------------------------------------+
+    "
     az aks update --resource-group $resource_group --name $cluster_name
 }
 
@@ -1744,6 +1754,13 @@ function az_aks_reconcile() {
     read resource_group
     echo "Enter Cluster Name:"
     read cluster_name
+
+    echo -e "
+    +--------------------------------------------------------+
+    |${MAGENTA}Performing Reconcile on AKS${ENDCOLOR}
+    |This process can take up to 15 minutes
+    +--------------------------------------------------------+
+    "
 
     command="az aks update --resource-group $resource_group --name $cluster_name"
     $command
