@@ -1955,7 +1955,7 @@ function az_aks_firewall_associate() {
     # Install Azure Firewall preview CLI extension
     az extension add --name azure-firewall
 
-    az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --kubernetes-version $kubernetes_version --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn $enable_aad_rbac --outbound-type userDefinedRouting --vnet-subnet-id $SUBNETID --api-server-authorized-ip-ranges $FWPUBLICIP_NAME,$CURRENT_IP
+    az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --kubernetes-version $kubernetes_version --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn $enable_aad_rbac --outbound-type userDefinedRouting --vnet-subnet-id $SUBNETID --api-server-authorized-ip-ranges $FWPUBLICIP_NAME,$CURRENT_IP --generate-ssh-keys
     echo -e "
     +-------------------------------------------------------------------------+
     |${GREEN}AKS Created${ENDCOLOR}
