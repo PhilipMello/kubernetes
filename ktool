@@ -227,7 +227,7 @@ function az_aks_create_default() {
     |${MAGENTA}AKS Creating${ENDCOLOR}
     +-------------------------------------------------------------------------+
     "  
-    az aks create --resource-group $resource_group --name $cluster_name --node-count 1 --tags AKS_ManagedCluster=PhilipMelloScriptAutomation
+    az aks create --resource-group $resource_group --name $cluster_name --node-count 1 --generate-ssh-keys --tags AKS_ManagedCluster=PhilipMelloScriptAutomation
     echo -e "
     +-------------------------------------------------------------------------+
     |${GREEN}AKS Created${ENDCOLOR}
@@ -282,7 +282,7 @@ function az_aks_create_with_options() {
     |${MAGENTA}AKS Creating${ENDCOLOR}
     +-------------------------------------------------------------------------+
     "  
-    az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --kubernetes-version $kubernetes_version --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn $enable_aad_rbac
+    az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --kubernetes-version $kubernetes_version --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn $enable_aad_rbac --generate-ssh-keys
     echo -e "
     +-------------------------------------------------------------------------+
     |${GREEN}AKS Created${ENDCOLOR}
@@ -338,7 +338,7 @@ function az_aks_create_private_with_options() {
     |${MAGENTA}AKS Creating${ENDCOLOR}
     +-------------------------------------------------------------------------+
     "  
-    az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn $enable_aad_rbac
+    az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn $enable_aad_rbac --generate-ssh-keys
     echo -e "
     +-------------------------------------------------------------------------+
     |${GREEN}AKS Created${ENDCOLOR}
@@ -475,7 +475,7 @@ function az_aks_create_with_firewall () {
     |${MAGENTA}Creating AKS with Firewall${ENDCOLOR}
     +-------------------------------------------------------------------------+
     "  
-    az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --kubernetes-version $kubernetes_version --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn $enable_aad_rbac --outbound-type userDefinedRouting --vnet-subnet-id $SUBNETID  --api-server-authorized-ip-ranges $FWPUBLIC_IP
+    az aks create --resource-group $resource_group --name $cluster_name --location $location --node-count $node_count --network-plugin $network_plugin --tier $tier --kubernetes-version $kubernetes_version --os-sku $os_sku --node-vm-size $node_vm_size $msi_or_spn $enable_aad_rbac --outbound-type userDefinedRouting --vnet-subnet-id $SUBNETID  --api-server-authorized-ip-ranges $FWPUBLIC_IP --generate-ssh-keys
     echo -e "
     +-------------------------------------------------------------------------+
     |${GREEN}AKS with Firewall Created${ENDCOLOR}
@@ -1754,7 +1754,7 @@ function az_aks_reconcile() {
     read resource_group
     echo "Enter Cluster Name:"
     read cluster_name
-    
+
     provisioning_state=$(az aks show --resource-group $resource_group --name $cluster_name --query provisioningState -o tsv)
     if [[ "$provisioning_state" == "Succeeded" ]]; then
         echo -e "
