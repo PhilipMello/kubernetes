@@ -12,21 +12,28 @@
 # 📝 About
 ## Free tools for Kubernetes (k8s)
 
+# 📚 Index
+🔖 [Downloading and Installing](#-downloading-and-installing)<br>
+🔖 [Navigating the tool](#-navigating-the-tool)<br>
+
+---
+# 🔧 Downloading and Installing
+
 ```
 wget https://raw.githubusercontent.com/PhilipMello/kubernetes/main/ktool && chmod +x ktool
 ```
+OR
+```
+wget https://raw.githubusercontent.com/PhilipMello/kubernetes/main/ktool && chmod +x ktool && sudo mv ktool /usr/bin/
+```
 
-# 📚 Index
-🔖 [AKS Tool](#-ktool)<br>
-🔖 [Service Principal Name (SPN) RESET](#-service-principal-name-spn-reset)<br>
-🔖 [AKS Cluster State Check](#-aks-cluster-state-check)<br>
-🔖 [MSI SPN Check](#-msi-spn-check)<br>
-🔖 [AKS Create](#-aks-create)<br>
+![Downloading and Installing](assets/images/downloading-and-installing-ktool.gif)
 
 ---
-# 🔧 AKS Tool
 
-![AKS Tool](assets/images/ktool.gif)
+# 🔧 Navigating the tool
+
+![Navigating the tool](assets/images/navigating-the-ktool-02.gif)
 
 ---
 
