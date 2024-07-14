@@ -1107,6 +1107,8 @@ function az_cli_tools(){
     echo "1. Install az-cli"
     echo "2. Install kubectl"
     echo "3. Install helm"
+    echo "4. Install Docker Engine"
+    echo "5. Install Ubuntu Packages"
     read option
     case $option in
     1)
