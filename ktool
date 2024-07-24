@@ -2040,7 +2040,7 @@ function cluster_on_off() {
     cluster_on_off
 }
 
-# ---
+# <-- Manual - BEGIN
 
 # Manual
 manual() {
@@ -2057,20 +2057,26 @@ if [[ $1 == "-h" || $1 == "--help" || "$1" == "--h" ]]; then
     exit 1
 fi
 
-echo "Choose an option:"
-echo "1. Azure Resource Group (Create, Delete, Check)"
-echo "2. AKS Operations (Create, Delete...)"
-echo "3. VMSS Operations"
-echo "4. Run command on VM"
-echo "5. Backup Pod Disruption Budget (PDB)"
-echo "6. Check ACR Connection"
-echo "7. Check Top (Pods and Nodes)"
-echo "8. Get TCPDUMP"
-echo "9. Get SysLog"
-echo "10. Information"
-echo "98. Tools (Install az-cli, kubectl or helm)"
-echo "99. Cluster Analysis (Top Nodes, Top Pods, MSI, SPN, PDB, PowerState, Credentials, AKS URL...)"
-read option
+# Manual - END -->
+
+main_menu() {
+    echo "Choose an option:"
+    echo "1. Azure Resource Group (Create, Delete, Check)"
+    echo "2. AKS Operations (Create, Delete...)"
+    echo "3. VMSS Operations"
+    echo "4. Run command on VM"
+    echo "5. Backup Pod Disruption Budget (PDB)"
+    echo "6. Check ACR Connection"
+    echo "7. Check Top (Pods and Nodes)"
+    echo "8. Get TCPDUMP"
+    echo "9. Get SysLog"
+    echo "10. Information"
+    echo "98. Tools (Install az-cli, kubectl or helm)"
+    echo "99. Cluster Analysis (Top Nodes, Top Pods, MSI, SPN, PDB, PowerState, Credentials, AKS URL...)"
+    read option
+}
+
+main_menu
 
 case $option in
     1)
