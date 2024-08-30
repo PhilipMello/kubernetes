@@ -1107,8 +1107,9 @@ function az_cli_tools(){
     echo "1. Install az-cli"
     echo "2. Install kubectl"
     echo "3. Install helm"
-    echo "4. Install Docker Engine"
-    echo "5. Install Ubuntu Packages"
+    echo "4. Install ArgoCD"
+    echo "5. Install Docker Engine"
+    echo "6. Install Ubuntu Packages"
     read option
     case $option in
     1)
@@ -1164,6 +1165,42 @@ function az_cli_tools(){
         "
         ;;
     4)
+        echo -e "ArgoCD Official Documentation:
+        'https://argo-cd.readthedocs.io/en/stable/getting_started/'
+        "
+        output=$(argocd version)
+        if [ "$output" == "argocd version" ]; then
+            echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}ArgoCD already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+            exit 0
+        fi
+
+        echo "Install ArgoCD"
+        echo -e "
+        +-------------------------------------------------------+
+        |${MAGENTA}Installing ArgoCD${ENDCOLOR}
+        +-------------------------------------------------------+
+        "
+        kubectl create namespace argocd
+        kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+        sleep 20
+        curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+        sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+        rm argocd-linux-amd64
+        
+        argocd_password$=(kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d)
+        echo -e "
+        +-------------------------------------------------------+
+        |${GREEN}ArgoCD Installed${ENDCOLOR}
+        |${MAGENTA}Login: admin${ENDCOLOR}
+        |${MAGENTA}Password: $argocd_password${ENDCOLOR}
+        +-------------------------------------------------------+
+        "
+        ;;
+    5)
         echo -e "Docker Official Documentation: 
         'https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository'
         "
@@ -1192,7 +1229,7 @@ function az_cli_tools(){
         "
         docker --version  
         ;;
-    5)
+    6)
         echo "Install Ubuntu Packages"
         echo -e "
         +-------------------------------------------------------+
