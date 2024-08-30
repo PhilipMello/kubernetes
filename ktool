@@ -2090,7 +2090,23 @@ manual() {
 if [[ $1 == "-h" || $1 == "--help" || "$1" == "--h" ]]; then
     manual
     exit 1
+
+ # <---  Pipeline
+elif [[ $1 == "--argocd" ]]; then
+    kubectl create namespace argocd
+    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+    exit $?
+elif [[ $1 == "--argocd-cli" ]]; then
+    echo "Installing argocd-cli"
+    curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+    sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+    rm argocd-linux-amd64
+    status=$?
+    message=$([ $status -eq 0 ] && echo "<--argocd-cli installed  successfully-->" || echo "Error code: $status")
+    echo $message
+    exit $status
 fi
+# --->
 
 # Manual - END -->
 
