@@ -1168,8 +1168,8 @@ function az_cli_tools(){
         echo -e "ArgoCD Official Documentation:
         'https://argo-cd.readthedocs.io/en/stable/getting_started/'
         "
-        output=$(argocd version)
-        if [ "$output" == "argocd version" ]; then
+        output=$(argocd version | grep -oP '^argocd(?=:)')
+        if [ "$output" == "argocd" ]; then
             echo -e "
             +-------------------------------------------------------+
             |${MAGENTA}ArgoCD already installed${ENDCOLOR}
@@ -1191,7 +1191,7 @@ function az_cli_tools(){
         sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
         rm argocd-linux-amd64
         
-        argocd_password$=(kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d)
+        argocd_password=$(kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d)
         echo -e "
         +-------------------------------------------------------+
         |${GREEN}ArgoCD Installed${ENDCOLOR}
