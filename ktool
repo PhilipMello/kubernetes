@@ -2108,10 +2108,9 @@ elif [[ $1 == "--argocd" ]]; then
 elif [[ $1 == "--argocd-cli" ]]; then
     which argocd
     status=$?
-    message=$([ $status -eq 1 ] && echo "<--argocd-cli already installed-->" || echo "Error code: $status")
+    message=$([ $status -eq 0 ] && echo "<--argocd-cli already installed-->" || echo "<--Installing argocd-cli...-->")
     echo $message
     exit $status
-    echo "Installing argocd-cli"
     curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
     sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
     rm argocd-linux-amd64
