@@ -1172,7 +1172,7 @@ function az_cli_tools(){
         if [ "$output" == "argocd" ]; then
             echo -e "
             +-------------------------------------------------------+
-            |${MAGENTA}ArgoCD already installed${ENDCOLOR}
+            |${MAGENTA}ArgoCD CLI already installed${ENDCOLOR}
             +-------------------------------------------------------+
             "
             exit 0
@@ -1198,6 +1198,11 @@ function az_cli_tools(){
         |${MAGENTA}Login: admin${ENDCOLOR}
         |${MAGENTA}Password: $argocd_password${ENDCOLOR}
         +-------------------------------------------------------+
+        "
+        echo -e " To port-foward the ArgoCD GUI use:
+        +--------------------------------------------------------------+
+        |${MAGENTA}kubectl port-forward svc/argocd-server -n argocd 8080:443${ENDCOLOR}
+        +--------------------------------------------------------------+
         "
         ;;
     5)
@@ -2090,25 +2095,32 @@ manual() {
 if [[ $1 == "-h" || $1 == "--help" || "$1" == "--h" ]]; then
     manual
     exit 1
+# Manual - END -->
 
  # <---  Pipeline
 elif [[ $1 == "--argocd" ]]; then
     kubectl create namespace argocd
     kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-    exit $?
+    status=$?
+    message=$([ $status -eq 0 ] && echo "<--argocd installed on Kubernetes successfully-->" || echo "Error code: $status")
+    echo $message
+    exit $status
 elif [[ $1 == "--argocd-cli" ]]; then
+    which argocd
+    status=$?
+    message=$([ $status -eq 1 ] && echo "<--argocd-cli already installed-->" || echo "Error code: $status")
+    echo $message
+    exit $status
     echo "Installing argocd-cli"
     curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
     sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
     rm argocd-linux-amd64
     status=$?
-    message=$([ $status -eq 0 ] && echo "<--argocd-cli installed  successfully-->" || echo "Error code: $status")
+    message=$([ $status -eq 0 ] && echo "<--argocd-cli installed successfully-->" || echo "Error code: $status")
     echo $message
     exit $status
 fi
-# --->
-
-# Manual - END -->
+# Pipeline END --->
 
 main_menu() {
     echo "Choose an option:"
