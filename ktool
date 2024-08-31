@@ -2085,9 +2085,15 @@ function cluster_on_off() {
 # <-- Manual - BEGIN
 
 manual() {
-    echo -e "Get AKS Credentials: 'https://docs.microsoft.com/en-US/cli/azure/aks#az_aks_get_credentials'"
-    echo -e "Azure CLI Commands
-    'https://learn.microsoft.com/en-us/cli/azure/vmss?view=azure-cli-latest#commands'
+    echo -e "Azure Documentation:
+    Get AKS Credentials:
+        'https://docs.microsoft.com/en-US/cli/azure/aks#az_aks_get_credentials'
+    Azure CLI Commands:
+        'https://learn.microsoft.com/en-us/cli/azure/vmss?view=azure-cli-latest#commands'
+    "
+    echo -e "Pipeline parameters:
+    --argocd            Install argocd on Kubernetes Cluster
+    --argocd-cli        Install argocd cli on Linux
     "
     exit 0
 }
