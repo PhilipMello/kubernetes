@@ -1103,87 +1103,191 @@ function aks_enable_disable_addon() {
 }
 
 function az_cli_tools(){
-    # Az Cli Tools
-    echo "1. Install az-cli"
-    echo "2. Install kubectl"
-    echo "3. Install helm"
-    echo "4. Install ArgoCD"
-    echo "5. Install Docker Engine"
-    echo "6. Install Ubuntu Packages"
+    # CLI Tools
+    echo "1. Install kubectl"
+    echo "2. Install kubectl using az-cli"
+    echo "3. Install az-cli"
+    echo "4. Install OCI CLI (Oracle CLI)"
+    echo "5. Install helm"
+    echo "6. Install Terraform"
+    echo "7. Install ArgoCD"
+    echo "8. Install Docker Engine"
+    echo "9. Install Ubuntu Packages"
     read option
     case $option in
     1)
-        echo -e "Microsoft Official Documentation: 
-        'https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt'
+        echo -e "Kubernetes Official Documentation: 
+        'https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl'
         "
-        echo -e "
-        +-------------------------------------------------------+
-        |${MAGENTA}Installing az-cli${ENDCOLOR}
-        +-------------------------------------------------------+
-        "
-        curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-        echo -e "
-        +-------------------------------------------------------+
-        |${GREEN}az-cli Installed${ENDCOLOR}
-        +-------------------------------------------------------+
-        "
+        which kubectl > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Kubectl is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing Kubectl${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        sudo apt-get update
+        sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+        curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+        echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+        sudo apt-get update
+        sudo apt-get install -y kubelet kubeadm kubectl
+        sudo apt-mark hold kubelet kubeadm kubectl
+        which kubectl > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}Kubectl installed successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $?
         ;;
     2)
         echo -e "Microsoft Official Documentation: 
         'https://learn.microsoft.com/en-us/cli/azure/aks?view=azure-cli-latest#az-aks-install-cli'
         "
-        echo -e "
-        +-------------------------------------------------------+
-        |${MAGENTA}Installing kubectl${ENDCOLOR}
-        +-------------------------------------------------------+
-        "
+        which kubectl > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Kubectl is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing Kubectl${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
         az aks install-cli
-        echo -e "
-        +-------------------------------------------------------+
-        |${GREEN}kubectl Installed${ENDCOLOR}
-        +-------------------------------------------------------+
-        "
+        which kubectl > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}Kubectl installed successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $?
         ;;
     3)
+        echo -e "Microsoft Official Documentation: 
+        'https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt'
+        "
+        which az > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}AZ CLI is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing AZ CLI${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+        which oci-cli > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}AZ CLI installed successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $?
+        ;;
+    4)
+        echo -e "Oracle Official Documentation:
+        'https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliinstall.htm#InstallingCLI'
+        "
+        which oci-cli > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}OCI CLI is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing OCI CLI${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        bash -c "$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)"
+        which oci-cli > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}OCI CLI installed successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $?
+        ;;
+    5)
         echo -e "Helm Official Documentation: 
         'https://helm.sh/docs/intro/install/'
         'https://github.com/helm/helm/releases'
         "
-        echo "Install helm"
-        echo -e "
-        +-------------------------------------------------------+
-        |${MAGENTA}Installing helm${ENDCOLOR}
-        +-------------------------------------------------------+
-        "
+        which helm > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Helm is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing Helm${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
         wget https://get.helm.sh/helm-v3.14.3-linux-amd64.tar.gz
         tar -zxvf helm-v3.14.3-linux-amd64.tar.gz
         sudo mv linux-amd64/helm /usr/local/bin/helm
-        echo -e "
-        +-------------------------------------------------------+
-        |${GREEN}helm Installed${ENDCOLOR}
-        +-------------------------------------------------------+
-        "
+        which helm > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}Helm installed successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $?
         ;;
-    4)
+    6)
+         echo -e "Terraform Official Documentation:
+        'https://developer.hashicorp.com/terraform/tutorials/oci-get-started/install-cli?in=terraform%2Foci-get-started'
+        "
+        which terraform > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Terraform is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing Terraform${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        sudo apt-get update && sudo apt-get install -y gnupg software-properties-common
+        wget -O- https://apt.releases.hashicorp.com/gpg | \
+        gpg --dearmor | \
+        sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
+        gpg --no-default-keyring \
+        --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg \
+        --fingerprint
+        echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] \
+        https://apt.releases.hashicorp.com $(lsb_release -cs) main" | \
+        sudo tee /etc/apt/sources.list.d/hashicorp.list
+        sudo apt update
+        sudo apt-get install terraform
+        which terraform > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}Terraform installed successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $?
+        ;;
+    7)
         echo -e "ArgoCD Official Documentation:
         'https://argo-cd.readthedocs.io/en/stable/getting_started/'
         "
-        output=$(argocd version | grep -oP '^argocd(?=:)')
-        if [ "$output" == "argocd" ]; then
-            echo -e "
+        which argocd > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
             +-------------------------------------------------------+
-            |${MAGENTA}ArgoCD CLI already installed${ENDCOLOR}
+            |${MAGENTA}ArgoCD CLI is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing ArgoCD${ENDCOLOR}
             +-------------------------------------------------------+
             "
-            exit 0
-        fi
-
-        echo "Install ArgoCD"
-        echo -e "
-        +-------------------------------------------------------+
-        |${MAGENTA}Installing ArgoCD${ENDCOLOR}
-        +-------------------------------------------------------+
-        "
         kubectl create namespace argocd
         kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
         sleep 20
@@ -1205,16 +1309,21 @@ function az_cli_tools(){
         +--------------------------------------------------------------+
         "
         ;;
-    5)
+    8)
         echo -e "Docker Official Documentation: 
         'https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository'
         "
-        echo "Install Docker Engine on Ubuntu"
-        echo -e "
-        +-------------------------------------------------------+
-        |${MAGENTA}Installing Docker Engine${ENDCOLOR}
-        +-------------------------------------------------------+
-        "
+        which docker > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Docker Engine is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing Docker Engine${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
         sudo apt-get update
         sudo apt-get install ca-certificates curl
         sudo install -m 0755 -d /etc/apt/keyrings
@@ -1227,23 +1336,24 @@ function az_cli_tools(){
         sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
         sudo apt-get update
         sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-        echo -e "
-        +-------------------------------------------------------+
-        |${GREEN}Docker Engine Installed${ENDCOLOR}
-        +-------------------------------------------------------+
-        "
-        docker --version  
+        which docker > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}Docker Engine installed successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $?
         ;;
-    6)
+    9)
         echo "Install Ubuntu Packages"
         echo -e "
         +-------------------------------------------------------+
         |${MAGENTA}Installing Ubuntu Packages${ENDCOLOR}
         +-------------------------------------------------------+
         "
-        apt install -y sudo wget curl nano grep mtr jq htop btop p7zip dnsutils && \
-        apt install -y dnsmasq-utils bind*-utils tcpdump iperf3 ntpdate ipcalc sipcalc libsctp1 rsync stow nmap netcat-openbsd lnav git && \
-        wget https://raw.githubusercontent.com/PhilipMello/kubernetes/main/ktool && chmod +x ktool && sudo mv ktool /usr/bin
+        apt update -y
+        apt install -y pip python3
+        apt install -y sudo wget curl nano grep mtr jq htop btop p7zip dnsutils
+        apt install -y dnsmasq-utils bind*-utils tcpdump iperf3 ntpdate ipcalc sipcalc libsctp1 rsync stow nmap netcat-openbsd lnav git
         echo -e "
         +-------------------------------------------------------+
         |${GREEN}Ubuntu Packages Installed${ENDCOLOR}
@@ -2094,6 +2204,7 @@ manual() {
     echo -e "Pipeline parameters:
     --argocd            Install argocd on Kubernetes Cluster
     --argocd-cli        Install argocd cli on Linux
+    --terraform         Install Terraform
     "
     exit 0
 }
@@ -2112,18 +2223,30 @@ elif [[ $1 == "--argocd" ]]; then
     echo $message
     exit $status
 elif [[ $1 == "--argocd-cli" ]]; then
-    which argocd
-    status=$?
-    message=$([ $status -eq 0 ] && echo "<--argocd-cli already installed-->" || echo "<--Installing argocd-cli...-->")
-    echo $message
-    exit $status
+    which argocd > /dev/null 2>&1
+    [ $? -eq 0 ] && echo "<--argocd-cli is already installed-->" && exit $? || echo "<--argocd-cli is not installed, Installing...-->"
     curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
     sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
     rm argocd-linux-amd64
-    status=$?
-    message=$([ $status -eq 0 ] && echo "<--argocd-cli installed successfully-->" || echo "Error code: $status")
-    echo $message
-    exit $status
+    which argocd > /dev/null 2>&1
+    [ $? -eq 0 ] && echo "<--argocd-cli installed successfully-->" && exit $?
+elif [[ $1 == "--terraform" ]]; then
+    which terraform > /dev/null 2>&1
+    [ $? -eq 0 ] && echo "<--terraform is already installed-->" && exit $? || echo "<--terraform is not installed, installing...-->"
+    sudo apt-get update && sudo apt-get install -y gnupg software-properties-common
+    wget -O- https://apt.releases.hashicorp.com/gpg | \
+    gpg --dearmor | \
+    sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
+    gpg --no-default-keyring \
+    --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg \
+    --fingerprint
+    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] \
+    https://apt.releases.hashicorp.com $(lsb_release -cs) main" | \
+    sudo tee /etc/apt/sources.list.d/hashicorp.list
+    sudo apt update
+    sudo apt-get install terraform
+    which terraform > /dev/null 2>&1
+    [ $? -eq 0 ] && echo "<--terraform installed successfully-->" && exit $?
 fi
 # Pipeline END --->
 
@@ -2139,7 +2262,7 @@ main_menu() {
     echo "8. Get TCPDUMP"
     echo "9. Get SysLog"
     echo "10. Information"
-    echo "98. Tools (Install az-cli, kubectl or helm)"
+    echo "98. Tools (Install az-cli, kubectl, oci-cli, helm, Terraform, ArogoCD, Docker...)"
     echo "99. Cluster Analysis (Top Nodes, Top Pods, MSI, SPN, PDB, PowerState, Credentials, AKS URL...)"
     read option
 }
