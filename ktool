@@ -1354,6 +1354,7 @@ function az_cli_tools(){
         apt install -y pip python3
         apt install -y sudo wget curl nano grep mtr jq htop btop p7zip dnsutils
         apt install -y dnsmasq-utils bind*-utils tcpdump iperf3 ntpdate ipcalc sipcalc libsctp1 rsync stow nmap netcat-openbsd lnav git
+		apt install -y pipx
         echo -e "
         +-------------------------------------------------------+
         |${GREEN}Ubuntu Packages Installed${ENDCOLOR}
@@ -2190,6 +2191,43 @@ function cluster_on_off() {
     fi
     }
     cluster_on_off
+}
+
+function az_cli_tools(){
+    # ASW CLI Tools
+    echo "1. Install AWS CLI v2"
+    read option
+    case $option in
+    1)
+        echo -e "AWS Official Documentation: 
+        'https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html'
+        "
+        which awscli > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}AWS CLI V2 is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing AWS CLI V2${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+		unzip awscliv2.zip
+		sudo ./aws/install
+		rm awscliv2.zip
+        which oci-cli > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}AWS CLI installed successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $?
+        ;;
+    *)
+         echo "Invalid choice. Please select 1 to 5."
+        ;;
+    esac
 }
 
 # <-- Manual - BEGIN
