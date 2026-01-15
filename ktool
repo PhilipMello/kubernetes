@@ -2193,7 +2193,11 @@ function cluster_on_off() {
     cluster_on_off
 }
 
-function az_cli_tools(){
+function aws_tools() {
+	aws_cli_tools
+}
+
+function aws_cli_tools(){
     # ASW CLI Tools
     echo "1. Install AWS CLI v2"
     read option
@@ -2300,6 +2304,7 @@ main_menu() {
     echo "8. Get TCPDUMP"
     echo "9. Get SysLog"
     echo "10. Information"
+	echo "97. AWS Tools"
     echo "98. Tools (Install az-cli, kubectl, oci-cli, helm, Terraform, ArogoCD, Docker...)"
     echo "99. Cluster Analysis (Top Nodes, Top Pods, MSI, SPN, PDB, PowerState, Credentials, AKS URL...)"
     read option
@@ -2338,6 +2343,9 @@ case $option in
     10)
         az_aks_information
         ;;
+	97)
+		aws_tools
+		;;
     98)
         az_cli_tools
         ;;
