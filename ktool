@@ -592,6 +592,135 @@ function ktools_jenkins(){
     esac
 }
 
+function ktools_aws_cli(){
+    # ASW CLI Tools
+    echo "1. Install AWS CLI v2"
+ 	echo "2. Install AWS EKSCTL"
+    read option
+    case $option in
+    1)
+        echo -e "AWS Official Documentation: 
+        'https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html'
+        "
+        which awscli > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}AWS CLI V2 is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing AWS CLI V2${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+		unzip awscliv2.zip
+		sudo ./aws/install
+		rm awscliv2.zip
+        which oci-cli > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}AWS CLI installed successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $?
+        ;;
+	2)
+		aws_eksctl_tool
+		;;
+    *)
+         echo "Invalid choice. Please select 1 to 2."
+        ;;
+    esac
+}
+
+function ktools_aws_eksctl() {
+	echo -e "AWS Official Documentation: 
+    'https://docs.aws.amazon.com/eks/latest/eksctl/installation.html'
+    "
+    which eksctl > /dev/null 2>&1
+    [ $? -eq 0 ] && echo -e "
+    +-------------------------------------------------------+
+    |${MAGENTA}AWS EKSCTL is already installed${ENDCOLOR}
+    +-------------------------------------------------------+
+    " && exit $? \
+    || echo -e "
+    +-------------------------------------------------------+
+    |${MAGENTA}Installing AWS EKSCTL${ENDCOLOR}
+    +-------------------------------------------------------+
+    "
+	# for ARM systems, set ARCH to: `arm64`, `armv6` or `armv7`
+	ARCH=amd64
+	PLATFORM=$(uname -s)_$ARCH
+	curl -LO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
+	# (Optional) Verify checksum
+	# curl -sL "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_checksums.txt" | grep $PLATFORM | sha256sum --check
+	tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz
+	sudo install -m 0755 /tmp/eksctl /usr/local/bin && rm /tmp/eksctl
+ 	[ $? -eq 0 ] && echo -e "
+    +-------------------------------------------------------+
+    |${GREEN}AWS EKSCTL CLI installed successfully${ENDCOLOR}
+    +-------------------------------------------------------+
+    " && exit $?
+}
+
+function ktools_aws_tools() {
+	ktools_aws_cli
+}
+
+function ktools_azure_tools_menu(){
+    echo "Choose an option:"
+    echo "1. Azure Resource Group (Create, Delete, Check)"
+    echo "2. AKS Operations (Create, Delete...)"
+    echo "3. VMSS Operations"
+    echo "4. Run command on VM"
+    echo "5. Backup Pod Disruption Budget (PDB)"
+    echo "6. Check ACR Connection"
+    echo "7. Check Top (Pods and Nodes)"
+    echo "8. Get TCPDUMP"
+    echo "9. Get SysLog"
+    echo "10. Information"
+    echo "11. Cluster Analysis (Top Nodes, Top Pods, MSI, SPN, PDB, PowerState, Credentials, AKS URL...)"
+    read option
+    case $option in
+        1)
+            az_resource_group
+            ;;
+        2)  
+            az_aks
+            ;;
+        3)
+            az_vmss
+            ;;
+        4)
+            az_vm_run_command
+            ;;
+        5)
+            backup_pdb
+            ;;
+        6)
+            check_acr_connection
+            ;;
+        7) 
+            aks_check_top
+            ;;
+        8)
+            aks_tcpdump
+            ;;
+        9) 
+            aks_get_syslog
+            ;;
+        10)
+            az_aks_information
+            ;;
+        11)
+            cluster_analysis
+            ;;  
+        *)
+            echo "Invalid choice. Please select 1 to 11."
+            ;;
+    esac
+}
+
 # <-- K-Tools Tools Functions - END
 
 function ktools_menu(){
@@ -604,6 +733,9 @@ function ktools_menu(){
     echo "6. Helm Tools"
     echo "7. ArgoCD Tools"
     echo "8. Install Jenkins"
+    echo "9. AZURE Tools"
+    echo "10. AWS Tools"
+    echo "11. GCP Tools (Coming Soon)"
     read option
     case $option in
     1)
@@ -628,10 +760,16 @@ function ktools_menu(){
         ktools_argocd
         ;;
     8)
-        ktools_jenkins
+        ktools_jenkins 
+        ;;
+    9)
+        ktools_azure_tools
+        ;;
+    10)
+        ktools_aws_tools
         ;;
     *)
-        echo "Invalid choice. Please select 1 to 8."
+        echo "Invalid choice. Please select 1 to 10."
         ;;
     esac
 }
@@ -2522,81 +2660,6 @@ function cluster_on_off() {
     cluster_on_off
 }
 
-function aws_tools() {
-	aws_cli_tools
-}
-
-function aws_eksctl_tool() {
-	echo -e "AWS Official Documentation: 
-    'https://docs.aws.amazon.com/eks/latest/eksctl/installation.html'
-    "
-    which eksctl > /dev/null 2>&1
-    [ $? -eq 0 ] && echo -e "
-    +-------------------------------------------------------+
-    |${MAGENTA}AWS EKSCTL is already installed${ENDCOLOR}
-    +-------------------------------------------------------+
-    " && exit $? \
-    || echo -e "
-    +-------------------------------------------------------+
-    |${MAGENTA}Installing AWS EKSCTL${ENDCOLOR}
-    +-------------------------------------------------------+
-    "
-	# for ARM systems, set ARCH to: `arm64`, `armv6` or `armv7`
-	ARCH=amd64
-	PLATFORM=$(uname -s)_$ARCH
-	curl -LO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
-	# (Optional) Verify checksum
-	# curl -sL "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_checksums.txt" | grep $PLATFORM | sha256sum --check
-	tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz
-	sudo install -m 0755 /tmp/eksctl /usr/local/bin && rm /tmp/eksctl
- 	[ $? -eq 0 ] && echo -e "
-    +-------------------------------------------------------+
-    |${GREEN}AWS EKSCTL CLI installed successfully${ENDCOLOR}
-    +-------------------------------------------------------+
-    " && exit $?
-}
-
-function aws_cli_tools(){
-    # ASW CLI Tools
-    echo "1. Install AWS CLI v2"
- 	echo "2. Install AWS EKSCTL"
-    read option
-    case $option in
-    1)
-        echo -e "AWS Official Documentation: 
-        'https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html'
-        "
-        which awscli > /dev/null 2>&1
-        [ $? -eq 0 ] && echo -e "
-            +-------------------------------------------------------+
-            |${MAGENTA}AWS CLI V2 is already installed${ENDCOLOR}
-            +-------------------------------------------------------+
-            " && exit $? \
-        || echo -e "
-            +-------------------------------------------------------+
-            |${MAGENTA}Installing AWS CLI V2${ENDCOLOR}
-            +-------------------------------------------------------+
-            "
-        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-		unzip awscliv2.zip
-		sudo ./aws/install
-		rm awscliv2.zip
-        which oci-cli > /dev/null 2>&1
-        [ $? -eq 0 ] && echo -e "
-            +-------------------------------------------------------+
-            |${GREEN}AWS CLI installed successfully${ENDCOLOR}
-            +-------------------------------------------------------+
-            " && exit $?
-        ;;
-	2)
-		aws_eksctl_tool
-		;;
-    *)
-         echo "Invalid choice. Please select 1 to 2."
-        ;;
-    esac
-}
-
 # <-- Manual - BEGIN
 
 manual() {
@@ -2657,19 +2720,8 @@ fi
 
 main_menu() {
     echo "Choose an option:"
-    echo "1. Azure Resource Group (Create, Delete, Check)"
-    echo "2. AKS Operations (Create, Delete...)"
-    echo "3. VMSS Operations"
-    echo "4. Run command on VM"
-    echo "5. Backup Pod Disruption Budget (PDB)"
-    echo "6. Check ACR Connection"
-    echo "7. Check Top (Pods and Nodes)"
-    echo "8. Get TCPDUMP"
-    echo "9. Get SysLog"
-    echo "10. Information"
-	echo "97. AWS Tools"
-    echo "98. Tools (Install az-cli, kubectl, oci-cli, helm, Terraform, ArogoCD, Docker...)"
-    echo "99. Cluster Analysis (Top Nodes, Top Pods, MSI, SPN, PDB, PowerState, Credentials, AKS URL...)"
+    echo "1) Install az-cli, kubectl, oci-cli, helm, Terraform, ArogoCD, Docker..."
+    echo "2) AKS Operations: Create, Manage, Debug, Update..."
     read option
 }
 
@@ -2677,43 +2729,10 @@ main_menu
 
 case $option in
     1)
-        az_resource_group
-        ;;
-    2)  
-        az_aks
-        ;;
-    3)
-        az_vmss
-        ;;
-    4)
-        az_vm_run_command
-        ;;
-    5)
-        backup_pdb
-        ;;
-    6)
-        check_acr_connection
-        ;;
-    7) 
-        aks_check_top
-        ;;
-    8)
-        aks_tcpdump
-        ;;
-    9) 
-        aks_get_syslog
-        ;;
-    10)
-        az_aks_information
-        ;;
-	97)
-		aws_tools
-		;;
-    98)
         ktools_menu
         ;;
-    99)
-        cluster_analysis
+    2)
+        ktools_azure_tools_menu
         ;;
     *)
         echo "Invalid option"
