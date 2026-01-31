@@ -42,6 +42,600 @@ GREEN="\033[97;102m"
 RED="\033[97;41m"
 ENDCOLOR="\e[0m"
 
+function os_check(){
+    if [[ "$(uname -s)" != "Linux" ]]; then
+        echo -e "
+        +-------------------------------------------------------+
+        |${RED}This script only supports Linux OS${ENDCOLOR}
+        +-------------------------------------------------------+
+        "
+        exit 1
+    fi
+}
+
+function os_package_detect(){
+    if grep -qi "ubuntu" /etc/os-release; then
+        PACKAGE_MANAGER="apt"
+        OS_NAME="ubuntu"
+    elif grep -qi "debian" /etc/os-release; then
+        PACKAGE_MANAGER="apt"
+        OS_NAME="debian"
+    elif grep -qi "centos" /etc/os-release; then
+        PACKAGE_MANAGER="yum"
+        OS_NAME="centos"
+    elif grep -qi "rocky" /etc/os-release; then
+        PACKAGE_MANAGER="dnf"
+        OS_NAME="rockylinux"
+    elif grep -qi "almalinux" /etc/os-release; then
+        PACKAGE_MANAGER="dnf"
+        OS_NAME="almalinux"
+    elif [ -f /etc/arch-release ]; then
+        PACKAGE_MANAGER="pacman"
+        OS_NAME="archlinux"
+    elif grep -qi "zorin" /etc/os-release; then
+        PACKAGE_MANAGER="apt"
+        OS_NAME="zorin"
+    elif grep -qi "alpine" /etc/os-release; then
+        PACKAGE_MANAGER="apk"
+        OS_NAME="alpine"
+    else
+        echo -e "
+        +-------------------------------------------------------+
+        |${RED}Unsupported Linux distribution${ENDCOLOR}
+        +-------------------------------------------------------+
+        "
+        exit 1
+    fi
+}
+
+os_check
+os_package_detect
+
+# <-- K-Tools Tools Functions - BEGIN
+
+function ktools_os_packages(){
+    echo "$OS_NAME Packages"
+    echo "1. Install $OS_NAME Packages"
+    echo "2. Uninstall $OS_NAME Packages"
+    read option
+    case $option in
+    1)
+        echo -e "
+        +-------------------------------------------------------+
+        |${MAGENTA}Installing $OS_NAME Packages${ENDCOLOR}
+        +-------------------------------------------------------+
+        "
+        $PACKAGE_MANAGER install update -y
+        $PACKAGE_MANAGER install -y pip python3
+        $PACKAGE_MANAGER install -y sudo wget curl nano grep mtr jq htop btop p7zip unzip dnsutils
+        $PACKAGE_MANAGER install -y dnsmasq-utils bind*-utils tcpdump iperf3 ntpdate ipcalc sipcalc libsctp1 rsync stow nmap netcat-openbsd lnav git
+        $PACKAGE_MANAGER install -y pipx
+        echo -e "
+        +-------------------------------------------------------+
+        |${GREEN}$OS_NAME Packages Installed${ENDCOLOR}
+        +-------------------------------------------------------+
+        "  
+    ;;
+    2)
+        echo -e "
+        +-------------------------------------------------------+
+        |${MAGENTA}Uninstalling $OS_NAME Packages${ENDCOLOR}
+        +-------------------------------------------------------+
+        "
+        $PACKAGE_MANAGER remove -y pip python3
+        $PACKAGE_MANAGER remove -y sudo wget curl nano grep mtr jq htop btop p7zip unzip dnsutils
+        $PACKAGE_MANAGER remove -y dnsmasq-utils bind*-utils tcpdump ntpdate ipcalc sipcalc libsctp1 rsync stow nmap netcat-openbsd lnav git iperf3
+        $PACKAGE_MANAGER remove -y pipx
+        echo -e "
+        +-------------------------------------------------------+
+        |${GREEN}$OS_NAME Packages Uninstalled${ENDCOLOR}
+        +-------------------------------------------------------+
+        "
+    ;;
+    *)
+        echo "Invalid choice. Please select 1 or 2."
+        ;;
+
+    esac
+}
+
+function ktools_k8s(){
+    echo "Kubernetes Tools"
+    echo "1. Install kubectl ONLY"
+    echo "2. Install kubectl, kubeadm, kubelet"
+    echo "3. Fix $HOME/.kube/config permissions"
+    echo "4. Install k9s"
+    echo "5. Install kustomize"
+    echo "6. Install kind (Kubernetes IN Docker)"
+    echo "7. Install minikube"
+    read option
+    case $option in
+    1)
+        echo -e "Kubernetes Official Documentation: 
+        'https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/'
+        "
+        which kubectl > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Kubectl is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing Kubectl${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        sudo curl -sLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        sudo chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/
+    ;;
+    2)
+        echo -e "Kubernetes Official Documentation: 
+        'https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl'
+        "
+        which kubectl > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Kubectl is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing Kubectl${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        sudo apt-get update
+        sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+        curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.35/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+        echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.35/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+        sudo apt-get update
+        sudo apt-get install -y kubelet kubeadm kubectl
+        sudo apt-mark hold kubelet kubeadm kubectl
+        which kubectl kubeadm kubelet > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}Kubectl, kubeadm, kubelet installed successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $?
+    ;;
+    3)
+        echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Fixing permissions for $HOME/.kube/config${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        sudo chown -R $(whoami) $HOME/.kube/config
+        echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}Permissions fixed for $HOME/.kube/config${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+    ;;
+    4)
+        echo -e "K9s Official Documentation: 
+        'https://k9scli.io/topics/install/'
+        "
+        which k9s > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}K9s is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing K9s${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        wget https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_amd64.tar.gz
+        tar -xzf k9s_Linux_amd64.tar.gz
+        sudo mv k9s /usr/local/bin/
+        rm k9s_Linux_amd64.tar.gz
+        which k9s > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}K9s installed successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $?
+    ;;
+    5)
+        echo -e "Kustomize Official Documentation: 
+        'https://kustomize.io/docs/installation/'
+        "
+        which kustomize > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Kustomize is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing Kustomize${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        wget https://github.com/kubernetes-sigs/kustomize/releases/latest/download/kustomize_v5.0.0_linux_amd64.tar.gz
+        tar -xzf kustomize_v5.0.0_linux_amd64.tar.gz
+        sudo mv kustomize /usr/local/bin/
+        rm kustomize_v5.0.0_linux_amd64.tar.gz
+        which kustomize > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}Kustomize installed successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $?
+    ;;
+    6)
+        echo -e "Kind Official Documentation: 
+        'https://kind.sigs.k8s.io/docs/user/quick-start/'
+        "
+        which kind > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Kind is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing Kind${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        wget https://github.com/kubernetes-sigs/kind/releases/latest/download/kind-linux-amd64
+        chmod +x kind-linux-amd64
+        sudo mv kind-linux-amd64 /usr/local/bin/kind
+    ;;
+    7)
+      echo -e "Minikube Official Documentation: 
+      'https://minikube.sigs.k8s.io/docs/start/'
+      "
+      which minikube > /dev/null 2>&1
+      [ $? -eq 0 ] && echo -e "
+          +-------------------------------------------------------+
+          |${MAGENTA}Minikube is already installed${ENDCOLOR}
+          +-------------------------------------------------------+
+          " && exit $? \
+      || echo -e "
+          +-------------------------------------------------------+
+          |${MAGENTA}Installing Minikube${ENDCOLOR}
+          +-------------------------------------------------------+
+          "
+      wget https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-amd64
+      chmod +x minikube-linux-amd64
+      sudo mv minikube-linux-amd64 /usr/local/bin/minikube
+    ;;
+    *)
+        echo "Invalid choice. Please select 1 to 7."
+        ;;
+    esac
+
+}
+
+function ktools_docker(){
+    # Docker Tools
+    echo "1. Install Docker Engine"
+    echo "2. Install Docker Compose"
+    read option
+    case $option in
+    1)
+        echo -e "Docker Official Documentation: 
+        'https://docs.docker.com/engine/install/ubuntu/'
+        "
+        which docker > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Docker Engine is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing Docker Engine${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        sudo apt-get update
+        sudo apt-get install -y ca-certificates curl gnupg lsb-release
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        sudo apt-get update
+        sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+        which docker > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}Docker Engine installed successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $?
+        ;;
+    2)
+        echo -e "Docker Compose Official Documentation: 
+        'https://docs.docker.com/compose/install/'
+        "
+        which docker-compose > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Docker Compose is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing Docker Compose${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+        which docker-compose > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}Docker Compose installed successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $?
+        ;;
+    esac
+}
+
+function ktools_oracle(){
+    # Oracle Cloud Tools
+    echo "1. Install OCI CLI (Oracle CLI)"
+    read option
+    case $option in
+    1)
+        echo -e "Oracle Official Documentation:
+        'https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliinstall.htm#InstallingCLI'
+        "
+        which oci-cli > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}OCI CLI is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing OCI CLI${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        bash -c "$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)"
+        which oci-cli > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}OCI CLI installed successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $?
+        ;;
+    esac
+}
+
+function ktools_terraform(){
+    # Terraform Tools
+    echo "1. Install Terraform"
+    read option
+    case $option in
+    1)
+         echo -e "Terraform Official Documentation:
+        'https://developer.hashicorp.com/terraform/tutorials/oci-get-started/install-cli?in=terraform%2Foci-get-started'
+        "
+        which terraform > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Terraform is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing Terraform${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        sudo apt-get update && sudo apt-get install -y gnupg software-properties-common
+        wget -O- https://apt.releases.hashicorp.com/gpg | \
+        gpg --dearmor | \
+        sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
+        gpg --no-default-keyring \
+        --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg \
+        --fingerprint
+        echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] \
+        https://apt.releases.hashicorp.com $(lsb_release -cs) main" | \
+        sudo tee /etc/apt/sources.list.d/hashicorp.list
+        sudo apt update
+        sudo apt-get install terraform
+        which terraform > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}Terraform installed successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $?
+        ;;
+    esac
+}
+
+function ktools_helm(){
+    # Helm Tools
+    echo "1. Install helm"
+    read option
+    case $option in
+    1)
+        echo -e "Helm Official Documentation:
+        'https://helm.sh/docs/intro/install/'
+        "
+        which helm > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Helm is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing Helm${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+        which helm > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}Helm installed successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $?
+        ;;
+    esac
+}
+
+function ktools_argocd(){
+    # ArgoCD Tools
+    echo "1. Install ArgoCD"
+    read option
+    case $option in
+    1)
+        echo -e "ArgoCD Official Documentation:
+        'https://argo-cd.readthedocs.io/en/stable/getting_started/'
+        "
+        which argocd > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}ArgoCD CLI is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing ArgoCD${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        kubectl create namespace argocd
+        kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+        sleep 20
+        curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+        sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+        rm argocd-linux-amd64
+        
+        argocd_password=$(kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d)
+        echo -e "
+        +-------------------------------------------------------+
+        |${GREEN}ArgoCD Installed${ENDCOLOR}
+        |${MAGENTA}Login: admin${ENDCOLOR}
+        |${MAGENTA}Password: $argocd_password${ENDCOLOR}
+        +-------------------------------------------------------+
+        "
+        echo -e " To port-foward the ArgoCD GUI use:
+        +--------------------------------------------------------------+
+        |${MAGENTA}kubectl port-forward svc/argocd-server -n argocd 8080:443${ENDCOLOR}
+        +--------------------------------------------------------------+
+        "
+    esac
+}
+
+function ktools_jenkins(){
+    # Jenkins Tools
+    echo "1. Install Jenkins"
+    echo "2. Uninstall Jenkins"
+    read option
+    case $option in
+    1)
+        echo -e "Jenkins Official Documentation:
+        'https://www.jenkins.io/doc/book/installing/linux/'
+        "
+        which java > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Java is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            "  \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing Java${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        $PACKAGE_MANAGER update
+        $PACKAGE_MANAGER install -y openjdk-21-jre
+        which java > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}Java installed successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            "   \
+
+        which jenkins > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Jenkins is already installed${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $? \
+        || echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Installing Jenkins${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        $PACKAGE_MANAGER install -y curl wget
+        wget -O /etc/apt/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian/jenkins.io-2026.key
+        echo deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ | tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+        $PACKAGE_MANAGER update
+        $PACKAGE_MANAGER install -y jenkins
+        systemctl daemon-reload
+        systemctl enable --now jenkins
+        which jenkins > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+        JENKINS_PASSWORD=$($HOME/.jenkins/secrets/initialAdminPassword)
+            +-------------------------------------------------------+
+            |${GREEN}Jenkins installed successfully${ENDCOLOR}
+            |${MAGENTA}Login: admin${ENDCOLOR}
+            |${MAGENTA}Password: $JENKINS_PASSWORD${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $?
+        ;;
+    2)
+        echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Uninstalling Jenkins${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        systemctl stop jenkins
+        $PACKAGE_MANAGER remove -y jenkins
+        rm -rf $HOME/.jenkins
+        echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}Jenkins uninstalled successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        ;;
+    esac
+}
+
+# <-- K-Tools Tools Functions - END
+
+function ktools_menu(){
+    echo "K-Tools Menu"
+    echo "1. Install $OS_NAME Packages"
+    echo "2. Kubernetes Tools"
+    echo "3. Docker Tools"
+    echo "4. Oracle Cloud Tools"
+    echo "5. Terraform Tools"
+    echo "6. Helm Tools"
+    echo "7. ArgoCD Tools"
+    echo "8. Install Jenkins"
+    read option
+    case $option in
+    1)
+        ktools_os_packages
+        ;;
+    2)
+        ktools_k8s
+        ;;
+    3)
+        ktools_docker
+        ;;
+    4)
+        ktools_oracle
+        ;;
+    5)
+        ktools_terraform
+        ;;
+    6)
+        ktools_helm
+        ;;
+    7)
+        ktools_argocd
+        ;;
+    8)
+        ktools_jenkins
+        ;;
+    *)
+        echo "Invalid choice. Please select 1 to 8."
+        ;;
+    esac
+}
+
 # <-- Az Resource Group Functions - BEGIN
 function az_resource_group() {
     echo -e " Microsoft Official Documentation: 
@@ -1102,271 +1696,6 @@ function aks_enable_disable_addon() {
     esac
 }
 
-function az_cli_tools(){
-    # CLI Tools
-    echo "1. Install kubectl"
-    echo "2. Install kubectl using az-cli"
-    echo "3. Install az-cli"
-    echo "4. Install OCI CLI (Oracle CLI)"
-    echo "5. Install helm"
-    echo "6. Install Terraform"
-    echo "7. Install ArgoCD"
-    echo "8. Install Docker Engine"
-    echo "9. Install Ubuntu Packages"
-    read option
-    case $option in
-    1)
-        echo -e "Kubernetes Official Documentation: 
-        'https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl'
-        "
-        which kubectl > /dev/null 2>&1
-        [ $? -eq 0 ] && echo -e "
-            +-------------------------------------------------------+
-            |${MAGENTA}Kubectl is already installed${ENDCOLOR}
-            +-------------------------------------------------------+
-            " && exit $? \
-        || echo -e "
-            +-------------------------------------------------------+
-            |${MAGENTA}Installing Kubectl${ENDCOLOR}
-            +-------------------------------------------------------+
-            "
-        sudo apt-get update
-        sudo apt-get install -y apt-transport-https ca-certificates curl gpg
-        curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-        echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
-        sudo apt-get update
-        sudo apt-get install -y kubelet kubeadm kubectl
-        sudo apt-mark hold kubelet kubeadm kubectl
-        which kubectl > /dev/null 2>&1
-        [ $? -eq 0 ] && echo -e "
-            +-------------------------------------------------------+
-            |${GREEN}Kubectl installed successfully${ENDCOLOR}
-            +-------------------------------------------------------+
-            " && exit $?
-        ;;
-    2)
-        echo -e "Microsoft Official Documentation: 
-        'https://learn.microsoft.com/en-us/cli/azure/aks?view=azure-cli-latest#az-aks-install-cli'
-        "
-        which kubectl > /dev/null 2>&1
-        [ $? -eq 0 ] && echo -e "
-            +-------------------------------------------------------+
-            |${MAGENTA}Kubectl is already installed${ENDCOLOR}
-            +-------------------------------------------------------+
-            " && exit $? \
-        || echo -e "
-            +-------------------------------------------------------+
-            |${MAGENTA}Installing Kubectl${ENDCOLOR}
-            +-------------------------------------------------------+
-            "
-        az aks install-cli
-        which kubectl > /dev/null 2>&1
-        [ $? -eq 0 ] && echo -e "
-            +-------------------------------------------------------+
-            |${GREEN}Kubectl installed successfully${ENDCOLOR}
-            +-------------------------------------------------------+
-            " && exit $?
-        ;;
-    3)
-        echo -e "Microsoft Official Documentation: 
-        'https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt'
-        "
-        which az > /dev/null 2>&1
-        [ $? -eq 0 ] && echo -e "
-            +-------------------------------------------------------+
-            |${MAGENTA}AZ CLI is already installed${ENDCOLOR}
-            +-------------------------------------------------------+
-            " && exit $? \
-        || echo -e "
-            +-------------------------------------------------------+
-            |${MAGENTA}Installing AZ CLI${ENDCOLOR}
-            +-------------------------------------------------------+
-            "
-        curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-        which oci-cli > /dev/null 2>&1
-        [ $? -eq 0 ] && echo -e "
-            +-------------------------------------------------------+
-            |${GREEN}AZ CLI installed successfully${ENDCOLOR}
-            +-------------------------------------------------------+
-            " && exit $?
-        ;;
-    4)
-        echo -e "Oracle Official Documentation:
-        'https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliinstall.htm#InstallingCLI'
-        "
-        which oci-cli > /dev/null 2>&1
-        [ $? -eq 0 ] && echo -e "
-            +-------------------------------------------------------+
-            |${MAGENTA}OCI CLI is already installed${ENDCOLOR}
-            +-------------------------------------------------------+
-            " && exit $? \
-        || echo -e "
-            +-------------------------------------------------------+
-            |${MAGENTA}Installing OCI CLI${ENDCOLOR}
-            +-------------------------------------------------------+
-            "
-        bash -c "$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)"
-        which oci-cli > /dev/null 2>&1
-        [ $? -eq 0 ] && echo -e "
-            +-------------------------------------------------------+
-            |${GREEN}OCI CLI installed successfully${ENDCOLOR}
-            +-------------------------------------------------------+
-            " && exit $?
-        ;;
-    5)
-        echo -e "Helm Official Documentation: 
-        'https://helm.sh/docs/intro/install/'
-        'https://github.com/helm/helm/releases'
-        "
-        which helm > /dev/null 2>&1
-        [ $? -eq 0 ] && echo -e "
-            +-------------------------------------------------------+
-            |${MAGENTA}Helm is already installed${ENDCOLOR}
-            +-------------------------------------------------------+
-            " && exit $? \
-        || echo -e "
-            +-------------------------------------------------------+
-            |${MAGENTA}Installing Helm${ENDCOLOR}
-            +-------------------------------------------------------+
-            "
-        wget https://get.helm.sh/helm-v3.14.3-linux-amd64.tar.gz
-        tar -zxvf helm-v3.14.3-linux-amd64.tar.gz
-        sudo mv linux-amd64/helm /usr/local/bin/helm
-        which helm > /dev/null 2>&1
-        [ $? -eq 0 ] && echo -e "
-            +-------------------------------------------------------+
-            |${GREEN}Helm installed successfully${ENDCOLOR}
-            +-------------------------------------------------------+
-            " && exit $?
-        ;;
-    6)
-         echo -e "Terraform Official Documentation:
-        'https://developer.hashicorp.com/terraform/tutorials/oci-get-started/install-cli?in=terraform%2Foci-get-started'
-        "
-        which terraform > /dev/null 2>&1
-        [ $? -eq 0 ] && echo -e "
-            +-------------------------------------------------------+
-            |${MAGENTA}Terraform is already installed${ENDCOLOR}
-            +-------------------------------------------------------+
-            " && exit $? \
-        || echo -e "
-            +-------------------------------------------------------+
-            |${MAGENTA}Installing Terraform${ENDCOLOR}
-            +-------------------------------------------------------+
-            "
-        sudo apt-get update && sudo apt-get install -y gnupg software-properties-common
-        wget -O- https://apt.releases.hashicorp.com/gpg | \
-        gpg --dearmor | \
-        sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
-        gpg --no-default-keyring \
-        --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg \
-        --fingerprint
-        echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] \
-        https://apt.releases.hashicorp.com $(lsb_release -cs) main" | \
-        sudo tee /etc/apt/sources.list.d/hashicorp.list
-        sudo apt update
-        sudo apt-get install terraform
-        which terraform > /dev/null 2>&1
-        [ $? -eq 0 ] && echo -e "
-            +-------------------------------------------------------+
-            |${GREEN}Terraform installed successfully${ENDCOLOR}
-            +-------------------------------------------------------+
-            " && exit $?
-        ;;
-    7)
-        echo -e "ArgoCD Official Documentation:
-        'https://argo-cd.readthedocs.io/en/stable/getting_started/'
-        "
-        which argocd > /dev/null 2>&1
-        [ $? -eq 0 ] && echo -e "
-            +-------------------------------------------------------+
-            |${MAGENTA}ArgoCD CLI is already installed${ENDCOLOR}
-            +-------------------------------------------------------+
-            " && exit $? \
-        || echo -e "
-            +-------------------------------------------------------+
-            |${MAGENTA}Installing ArgoCD${ENDCOLOR}
-            +-------------------------------------------------------+
-            "
-        kubectl create namespace argocd
-        kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-        sleep 20
-        curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-        sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
-        rm argocd-linux-amd64
-        
-        argocd_password=$(kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d)
-        echo -e "
-        +-------------------------------------------------------+
-        |${GREEN}ArgoCD Installed${ENDCOLOR}
-        |${MAGENTA}Login: admin${ENDCOLOR}
-        |${MAGENTA}Password: $argocd_password${ENDCOLOR}
-        +-------------------------------------------------------+
-        "
-        echo -e " To port-foward the ArgoCD GUI use:
-        +--------------------------------------------------------------+
-        |${MAGENTA}kubectl port-forward svc/argocd-server -n argocd 8080:443${ENDCOLOR}
-        +--------------------------------------------------------------+
-        "
-        ;;
-    8)
-        echo -e "Docker Official Documentation: 
-        'https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository'
-        "
-        which docker > /dev/null 2>&1
-        [ $? -eq 0 ] && echo -e "
-            +-------------------------------------------------------+
-            |${MAGENTA}Docker Engine is already installed${ENDCOLOR}
-            +-------------------------------------------------------+
-            " && exit $? \
-        || echo -e "
-            +-------------------------------------------------------+
-            |${MAGENTA}Installing Docker Engine${ENDCOLOR}
-            +-------------------------------------------------------+
-            "
-        sudo apt-get update
-        sudo apt-get install ca-certificates curl
-        sudo install -m 0755 -d /etc/apt/keyrings
-        sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-        sudo chmod a+r /etc/apt/keyrings/docker.asc
-        # Add the repository to Apt sources:
-        echo \
-        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-        $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-        sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-        sudo apt-get update
-        sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-        which docker > /dev/null 2>&1
-        [ $? -eq 0 ] && echo -e "
-            +-------------------------------------------------------+
-            |${GREEN}Docker Engine installed successfully${ENDCOLOR}
-            +-------------------------------------------------------+
-            " && exit $?
-        ;;
-    9)
-        echo "Install Ubuntu Packages"
-        echo -e "
-        +-------------------------------------------------------+
-        |${MAGENTA}Installing Ubuntu Packages${ENDCOLOR}
-        +-------------------------------------------------------+
-        "
-        apt update -y
-        apt install -y pip python3
-        apt install -y sudo wget curl nano grep mtr jq htop btop p7zip dnsutils
-        apt install -y dnsmasq-utils bind*-utils tcpdump iperf3 ntpdate ipcalc sipcalc libsctp1 rsync stow nmap netcat-openbsd lnav git
-		apt install -y pipx
-        echo -e "
-        +-------------------------------------------------------+
-        |${GREEN}Ubuntu Packages Installed${ENDCOLOR}
-        +-------------------------------------------------------+
-        "  
-        ;;
-    *)
-         echo "Invalid choice. Please select 1 to 5."
-        ;;
-    esac
-}
-
 function az_vm_run_command() {
     # Run command on vm
     echo "1. Run command on vm"
@@ -2381,7 +2710,7 @@ case $option in
 		aws_tools
 		;;
     98)
-        az_cli_tools
+        ktools_menu
         ;;
     99)
         cluster_analysis
