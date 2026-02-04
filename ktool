@@ -308,6 +308,327 @@ function ktools_k8s(){
 
 }
 
+function ktools_k8s_resources_pod_examples(){
+    echo -e "
+    +-------------------------------------------------------+
+    |${MAGENTA}Kubernetes Resources Pod Examples${ENDCOLOR}
+    +-------------------------------------------------------+
+    "
+    echo "1. Pod with resource limits and requests"
+    echo "2. Pod with node selector"
+    echo "3. Pod with tolerations"
+    echo "4. Create simple Pod"
+    read option
+    case $option in
+    1)
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example-pod
+spec:
+  containers:
+  - name: example-container
+    image: nginx:latest
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+EOF
+        ;;
+    2)
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example-pod-with-node-selector
+spec:
+  nodeSelector:
+    kubernetes.io/os: linux
+  containers:
+  - name: example-container
+    image: nginx:latest
+EOF
+        ;;
+    3)
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example-pod-with-tolerations
+spec:
+  tolerations:
+  - key: "example-key"
+    operator: "Equal"
+    value: "example-value"
+    effect: "NoSchedule"
+  containers:
+  - name: example-container
+    image: nginx:latest
+EOF
+        ;;
+    4)
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example-simple-pod
+spec:
+  containers:
+  - name: example-simple-container
+    image: nginx:latest
+EOF
+        ;;
+    *)
+        echo "Invalid choice. Please select 1 to 4."
+        ;;
+    esac
+}
+
+function ktools_k8s_resources_deployment_examples(){
+    echo -e "
+    +-------------------------------------------------------+
+    |${MAGENTA}Kubernetes Resources Deployment Examples${ENDCOLOR}
+    +-------------------------------------------------------+
+    "
+    echo "1. Deployment with resource limits and requests"
+    echo "2. Deployment with node selector"
+    echo "3. Deployment with tolerations"
+    read option
+    case $option in
+    1)
+kubectl apply -f - <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: example-app
+  template:
+    metadata:
+      labels:
+        app: example-app
+    spec:
+      containers:
+      - name: example-container
+        image: nginx:latest
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+EOF
+        ;;
+    2)
+kubectl apply -f - <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-deployment-with-node-selector
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: example-app-with-node-selector
+  template:
+    metadata:
+      labels:
+        app: example-app-with-node-selector
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+      - name: example-container
+        image: nginx:latest
+EOF
+        ;;
+    3)
+kubectl apply -f - <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-deployment-with-tolerations
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: example-app-with-tolerations  
+  template:
+    metadata:
+      labels:
+        app: example-app-with-tolerations  
+    spec:
+      tolerations:
+      - key: "example-key"
+        operator: "Equal"
+        value: "example-value"
+        effect: "NoSchedule"
+      containers:
+      - name: example-container  
+        image: nginx:latest  
+EOF
+        ;;
+    *)
+        echo "Invalid choice. Please select 1 to 3."
+        ;;
+    esac
+
+}
+
+function ktools_k8s_resources_service_examples(){
+    echo -e "
+    +-------------------------------------------------------+
+    |${MAGENTA}Kubernetes Resources Service Examples${ENDCOLOR}
+    +-------------------------------------------------------+
+    "
+    echo "1. ClusterIP Service"
+    echo "2. NodePort Service"
+    echo "3. LoadBalancer Service"
+    read option
+    case $option in
+    1)
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: example-clusterip-service
+spec:
+  selector:
+    app: example-app
+  ports:
+  - port: 81
+    targetPort: 80
+EOF
+        ;;
+    2)
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: example-nodeport-service
+spec:
+  selector:
+    app: example-app  
+  type: NodePort
+  ports:
+  - port: 82
+    targetPort: 80
+    nodePort: 30080  
+EOF
+        ;;
+    3)
+kubectl apply -f - <<EOF
+apiVersion: v1  
+kind: Service  
+metadata:
+  name: example-loadbalancer-service  
+spec:
+  selector:
+    app: example-app  
+  type: LoadBalancer  
+  ports:
+  - port: 83 
+    targetPort: 80  
+EOF
+        ;;
+    *)
+        echo "Invalid choice. Please select 1 to 3."
+        ;;
+    esac
+
+}
+
+function ktools_k8s_resources_service_account(){
+    read -p "Enter the Service Account name: " sa_name
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: $sa_name
+EOF
+}
+
+function ktools_setup_jenkins_on_k8s(){
+    read -p "Enter the Jenkins namespace: " jenkins_namespace
+        echo -e " #1)
+        +-------------------------------------------------------+
+        |${MAGENTA}Creating Jenkins namespace: $jenkins_namespace${ENDCOLOR}
+        +-------------------------------------------------------+
+        "
+    kubectl get namespace $jenkins_namespace > /dev/null 2>&1 || \
+    kubectl create namespace $jenkins_namespace
+
+        echo -e " #2)
+        +-------------------------------------------------------+
+        |${MAGENTA}Creating Jenkins SA on Kubernetes in namespace: $jenkins_namespace${ENDCOLOR}
+        +-------------------------------------------------------+
+        "
+kubectl apply -n $jenkins_namespace -f - <<EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+    name: jenkins-ci
+    namespace: $jenkins_namespace
+EOF
+        echo -e " #3)
+        +-------------------------------------------------------+
+        |${MAGENTA}Creating Role and Binding for Jenkins SA on Kubernetes in namespace: $jenkins_namespace${ENDCOLOR}
+        +-------------------------------------------------------+
+        "
+kubectl apply -n $jenkins_namespace -f - <<EOF
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: jenkins-ci
+rules:
+ - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: jenkins-ci
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: jenkins-ci
+subjects:
+- kind: ServiceAccount
+  name: jenkins-ci
+  namespace: $jenkins_namespace
+EOF
+
+        echo -e " #4)
+        +-------------------------------------------------------+
+        |${MAGENTA}Creating Service Jenkins on Kubernetes in namespace: $jenkins_namespace${ENDCOLOR}
+        +-------------------------------------------------------+
+        "
+kubectl apply -n $jenkins_namespace -f - <<EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-ci-agent
+  namespace: $jenkins_namespace
+spec:
+  selector:
+    app: jenkinsports:
+  ports:
+  - name: agent
+    port: 50000
+    targetPort: 50000
+EOF
+}
+
+
 function ktools_docker(){
     # Docker Tools
     echo "1. Install Docker Engine"
@@ -813,15 +1134,16 @@ function ktools_menu(){
     echo "K-Tools Menu"
     echo "1. Install $OS_NAME Packages"
     echo "2. Kubernetes Tools"
-    echo "3. Docker Tools"
-    echo "4. Oracle Cloud Tools"
-    echo "5. Terraform Tools"
-    echo "6. Helm Tools"
-    echo "7. ArgoCD Tools"
-    echo "8. Install Jenkins"
-    echo "9. AZURE Tools"
-    echo "10. AWS Tools"
-    echo "11. GCP Tools (Coming Soon)"
+    echo "3. Kubernetes Resources"
+    echo "4. Docker Tools"
+    echo "5. Oracle Cloud Tools"
+    echo "6. Terraform Tools"
+    echo "7. Helm Tools"
+    echo "8. ArgoCD Tools"
+    echo "9. Install Jenkins"
+    echo "10. AZURE Tools"
+    echo "11. AWS Tools"
+    echo "12. GCP Tools (Coming Soon)"
     read option
     case $option in
     1)
@@ -831,31 +1153,64 @@ function ktools_menu(){
         ktools_k8s
         ;;
     3)
-        ktools_docker
+        ktools_k8s_resources_menu
         ;;
     4)
-        ktools_oracle
+        ktools_docker
         ;;
     5)
-        ktools_terraform
+        ktools_oracle
         ;;
     6)
-        ktools_helm
+        ktools_terraform
         ;;
     7)
-        ktools_argocd
+        ktools_helm
         ;;
     8)
-        ktools_jenkins 
+        ktools_argocd
         ;;
     9)
-        ktools_azure_tools
+        ktools_jenkins 
         ;;
     10)
+        ktools_azure_tools
+        ;;
+    11)
         ktools_aws_tools_menu
         ;;
     *)
-        echo "Invalid choice. Please select 1 to 10."
+        echo "Invalid choice. Please select 1 to 12."
+        ;;
+    esac
+}
+
+function ktools_k8s_resources_menu(){
+    echo "Kubernetes Resources Menu"
+    echo "1. Pod Examples"
+    echo "2. Deployment Examples"
+    echo "3. Service Examples"
+    echo "4. Create Service Account"
+    echo "5. Setup Jenkins on Kubernetes"
+    read option
+    case $option in
+    1)
+        ktools_k8s_resources_pod_examples
+        ;;
+    2)
+        ktools_k8s_resources_deployment_examples
+        ;;
+    3)
+        ktools_k8s_resources_service_examples
+        ;;
+    4)
+        ktools_k8s_resources_service_account
+        ;;
+    5)
+        ktools_setup_jenkins_on_k8s
+        ;;
+    *)
+        echo "Invalid choice. Please select 1 to 5."
         ;;
     esac
 }
