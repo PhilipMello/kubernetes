@@ -33,7 +33,7 @@ echo "
 # Manual: ./ktool -h OR ./ktool --h OR ./ktool --help
 # --------------------------------------------------------------
 "
-WHITE=""
+WHITE="\033[97;107m"
 BLUE="\033[97;104m"
 YELLOW="\033[97;103m"
 CYAN="\033[97;106m"
@@ -595,7 +595,7 @@ function ktools_jenkins(){
 function ktools_aws_cli(){
     # ASW CLI Tools
     echo "1. Install AWS CLI v2"
- 	echo "2. Install AWS EKSCTL"
+ 	echo "2. Uninstall AWS CLI v2"
     read option
     case $option in
     1)
@@ -615,7 +615,7 @@ function ktools_aws_cli(){
             "
         curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 		unzip awscliv2.zip
-		sudo ./aws/install
+		./aws/install
 		rm awscliv2.zip
         which oci-cli > /dev/null 2>&1
         [ $? -eq 0 ] && echo -e "
@@ -625,10 +625,42 @@ function ktools_aws_cli(){
             " && exit $?
         ;;
 	2)
-		aws_eksctl_tool
+        echo -e "
+            +-------------------------------------------------------+
+            |${MAGENTA}Uninstalling AWS CLI V2${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
+        sudo /usr/local/aws-cli/v2/current/uninstall
+        echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}AWS CLI V2 uninstalled successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            "
 		;;
     *)
          echo "Invalid choice. Please select 1 to 2."
+        ;;
+    esac
+}
+
+function ktools_aws_tools_menu() {
+	echo "AWS Tools"
+    echo "1. Install AWS CLI v2"
+    echo "2. Install AWS EKSCTL"
+    echo "3. Install AWS SAM CLI"
+    read option
+    case $option in
+    1)
+        ktools_aws_cli
+        ;;
+    2)
+        ktools_aws_eksctl
+        ;;
+    3)
+        ktools_aws_sam_cli
+        ;;
+    *)
+        echo "Invalid choice. Please select 1 to 3."
         ;;
     esac
 }
@@ -663,8 +695,62 @@ function ktools_aws_eksctl() {
     " && exit $?
 }
 
-function ktools_aws_tools() {
-	ktools_aws_cli
+function ktools_aws_sam_cli() {
+    echo -e "AWS Official Documentation: 
+    'https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html'
+    "
+    which sam > /dev/null 2>&1
+    [ $? -eq 0 ] && echo -e "
+    +-------------------------------------------------------+
+    |${MAGENTA}AWS SAM CLI is already installed${ENDCOLOR}
+    +-------------------------------------------------------+
+    " && exit $? \
+    || echo -e "
+    +-------------------------------------------------------+
+    |${MAGENTA}Installing AWS SAM CLI${ENDCOLOR}
+    +-------------------------------------------------------+
+    "
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "x86_64" ]; then
+        ARCH=amd64
+    elif [ "$ARCH" = "aarch64" ]; then
+        ARCH=arm64
+    else
+        echo "Unsupported architecture: $ARCH"
+        exit 1
+    fi
+    curl -Lo sam-installation-script.sh https://raw.githubusercontent.com/aws/aws-sam-cli/main/installer/install
+    chmod +x sam-installation-script.sh
+    ./sam-installation-script.sh --update --install-dir /usr/local/bin --arch $ARCH
+    rm sam-installation-script.sh
+ 	[ $? -eq 0 ] && echo -e "
+    +-------------------------------------------------------+
+    |${GREEN}AWS SAM CLI installed successfully${ENDCOLOR}
+    +-------------------------------------------------------+
+    " && exit $?
+}
+
+function ktools_aws_codecommit(){
+    echo -e "AWS CodeCommit Official Documentation: 
+    'https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-git-credentials.html'
+    "
+    which git-remote-codecommit > /dev/null 2>&1
+    [ $? -eq 0 ] && echo -e "
+    +-------------------------------------------------------+
+    |${MAGENTA}AWS CodeCommit is already installed${ENDCOLOR}
+    +-------------------------------------------------------+
+    " && exit $? \
+    || echo -e "
+    +-------------------------------------------------------+
+    |${MAGENTA}Installing AWS CodeCommit${ENDCOLOR}
+    +-------------------------------------------------------+
+    "
+    pip install git-remote-codecommit
+ 	[ $? -eq 0 ] && echo -e "
+    +-------------------------------------------------------+
+    |${GREEN}AWS CodeCommit installed successfully${ENDCOLOR}
+    +-------------------------------------------------------+
+    " && exit $?
 }
 
 function ktools_azure_tools_menu(){
@@ -766,7 +852,7 @@ function ktools_menu(){
         ktools_azure_tools
         ;;
     10)
-        ktools_aws_tools
+        ktools_aws_tools_menu
         ;;
     *)
         echo "Invalid choice. Please select 1 to 10."
