@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-deployment-with-node-selector
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: example-app-with-node-selector
+  template:
+    metadata:
+      labels:
+        app: example-app-with-node-selector
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+      - name: example-container
+        image: nginx:latest

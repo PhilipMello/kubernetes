@@ -321,66 +321,16 @@ function ktools_k8s_resources_pod_examples(){
     read option
     case $option in
     1)
-kubectl apply -f - <<EOF
-apiVersion: v1
-kind: Pod
-metadata:
-  name: example-pod
-spec:
-  containers:
-  - name: example-container
-    image: nginx:latest
-    resources:
-      requests:
-        memory: "64Mi"
-        cpu: "250m"
-      limits:
-        memory: "128Mi"
-        cpu: "500m"
-EOF
+        kubectl apply -f https://raw.githubusercontent.com/PhilipMello/kubernetes/refs/heads/main/yaml/resources/pod/Pod-with-resource-limits-and-requests.yaml
         ;;
     2)
-kubectl apply -f - <<EOF
-apiVersion: v1
-kind: Pod
-metadata:
-  name: example-pod-with-node-selector
-spec:
-  nodeSelector:
-    kubernetes.io/os: linux
-  containers:
-  - name: example-container
-    image: nginx:latest
-EOF
+        kubectl apply -f https://raw.githubusercontent.com/PhilipMello/kubernetes/refs/heads/main/yaml/resources/pod/Pod-with-node-selector.yaml
         ;;
     3)
-kubectl apply -f - <<EOF
-apiVersion: v1
-kind: Pod
-metadata:
-  name: example-pod-with-tolerations
-spec:
-  tolerations:
-  - key: "example-key"
-    operator: "Equal"
-    value: "example-value"
-    effect: "NoSchedule"
-  containers:
-  - name: example-container
-    image: nginx:latest
-EOF
+        kubectl apply -f https://raw.githubusercontent.com/PhilipMello/kubernetes/refs/heads/main/yaml/resources/pod/Pod-with-tolerations.yaml
         ;;
     4)
-kubectl apply -f - <<EOF
-apiVersion: v1
-kind: Pod
-metadata:
-  name: example-simple-pod
-spec:
-  containers:
-  - name: example-simple-container
-    image: nginx:latest
-EOF
+        kubectl apply -f https://raw.githubusercontent.com/PhilipMello/kubernetes/refs/heads/main/yaml/resources/pod/Simple-pod.yaml
         ;;
     *)
         echo "Invalid choice. Please select 1 to 4."
@@ -400,81 +350,13 @@ function ktools_k8s_resources_deployment_examples(){
     read option
     case $option in
     1)
-kubectl apply -f - <<EOF
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: example-deployment
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: example-app
-  template:
-    metadata:
-      labels:
-        app: example-app
-    spec:
-      containers:
-      - name: example-container
-        image: nginx:latest
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "250m"
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-EOF
+        kubectl apply -f https://raw.githubusercontent.com/PhilipMello/kubernetes/refs/heads/main/yaml/resources/deployment/Deployment-with-resource-limits-and-requests.yaml
         ;;
     2)
-kubectl apply -f - <<EOF
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: example-deployment-with-node-selector
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: example-app-with-node-selector
-  template:
-    metadata:
-      labels:
-        app: example-app-with-node-selector
-    spec:
-      nodeSelector:
-        kubernetes.io/os: linux
-      containers:
-      - name: example-container
-        image: nginx:latest
-EOF
+        kubectl apply -f https://raw.githubusercontent.com/PhilipMello/kubernetes/refs/heads/main/yaml/resources/deployment/Deployment-with-node-selector.yaml
         ;;
     3)
-kubectl apply -f - <<EOF
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: example-deployment-with-tolerations
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: example-app-with-tolerations  
-  template:
-    metadata:
-      labels:
-        app: example-app-with-tolerations  
-    spec:
-      tolerations:
-      - key: "example-key"
-        operator: "Equal"
-        value: "example-value"
-        effect: "NoSchedule"
-      containers:
-      - name: example-container  
-        image: nginx:latest  
-EOF
+        kubectl apply -f https://raw.githubusercontent.com/PhilipMello/kubernetes/refs/heads/main/yaml/resources/deployment/Deployment-with-tolerations.yaml
         ;;
     *)
         echo "Invalid choice. Please select 1 to 3."
@@ -495,49 +377,13 @@ function ktools_k8s_resources_service_examples(){
     read option
     case $option in
     1)
-kubectl apply -f - <<EOF
-apiVersion: v1
-kind: Service
-metadata:
-  name: example-clusterip-service
-spec:
-  selector:
-    app: example-app
-  ports:
-  - port: 81
-    targetPort: 80
-EOF
+        kubectl apply -f https://raw.githubusercontent.com/PhilipMello/kubernetes/refs/heads/main/yaml/resources/svc/ClusterIP-Service.yaml
         ;;
     2)
-kubectl apply -f - <<EOF
-apiVersion: v1
-kind: Service
-metadata:
-  name: example-nodeport-service
-spec:
-  selector:
-    app: example-app  
-  type: NodePort
-  ports:
-  - port: 82
-    targetPort: 80
-    nodePort: 30080  
-EOF
+        kubectl apply -f https://raw.githubusercontent.com/PhilipMello/kubernetes/refs/heads/main/yaml/resources/svc/NodePort-Service.yaml
         ;;
     3)
-kubectl apply -f - <<EOF
-apiVersion: v1  
-kind: Service  
-metadata:
-  name: example-loadbalancer-service  
-spec:
-  selector:
-    app: example-app  
-  type: LoadBalancer  
-  ports:
-  - port: 83 
-    targetPort: 80  
-EOF
+        kubectl apply -f https://raw.githubusercontent.com/PhilipMello/kubernetes/refs/heads/main/yaml/resources/svc/LoadBalancer-Service.yaml
         ;;
     *)
         echo "Invalid choice. Please select 1 to 3."
@@ -548,12 +394,7 @@ EOF
 
 function ktools_k8s_resources_service_account(){
     read -p "Enter the Service Account name: " sa_name
-kubectl apply -f - <<EOF
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: $sa_name
-EOF
+    kubectl apply -f https://raw.githubusercontent.com/PhilipMello/kubernetes/refs/heads/main/yaml/resources/serviceaccount/service-account.yaml -n default
 }
 
 function ktools_setup_jenkins_on_k8s(){
@@ -571,61 +412,25 @@ function ktools_setup_jenkins_on_k8s(){
         |${MAGENTA}Creating Jenkins SA on Kubernetes in namespace: $jenkins_namespace${ENDCOLOR}
         +-------------------------------------------------------+
         "
-kubectl apply -n $jenkins_namespace -f - <<EOF
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-    name: jenkins-ci
-    namespace: $jenkins_namespace
-EOF
+    kubectl apply -n $jenkins_namespace -f https://raw.githubusercontent.com/PhilipMello/kubernetes/refs/heads/main/yaml/resources/jenkins/serviceaccount/service-account-jenkins.yaml
         echo -e " #3)
         +-------------------------------------------------------+
         |${MAGENTA}Creating Role and Binding for Jenkins SA on Kubernetes in namespace: $jenkins_namespace${ENDCOLOR}
         +-------------------------------------------------------+
         "
-kubectl apply -n $jenkins_namespace -f - <<EOF
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: jenkins-ci
-rules:
- - apiGroups: ["*"]
-    resources: ["*"]
-    verbs: ["*"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: jenkins-ci
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: jenkins-ci
-subjects:
-- kind: ServiceAccount
-  name: jenkins-ci
-  namespace: $jenkins_namespace
-EOF
+    kubectl apply -n $jenkins_namespace -f https://raw.githubusercontent.com/PhilipMello/kubernetes/refs/heads/main/yaml/resources/jenkins/rbac/rbac-jenins.yaml
 
         echo -e " #4)
         +-------------------------------------------------------+
         |${MAGENTA}Creating Service Jenkins on Kubernetes in namespace: $jenkins_namespace${ENDCOLOR}
         +-------------------------------------------------------+
         "
-kubectl apply -n $jenkins_namespace -f - <<EOF
-apiVersion: v1
-kind: Service
-metadata:
-  name: jenkins-ci-agent
-  namespace: $jenkins_namespace
-spec:
-  selector:
-    app: jenkinsports:
-  ports:
-  - name: agent
-    port: 50000
-    targetPort: 50000
-EOF
+    kubectl apply -n $jenkins_namespace -f https://raw.githubusercontent.com/PhilipMello/kubernetes/refs/heads/main/yaml/resources/jenkins/namespace/namespace-jenkins.yaml
+        echo -e " #5)
+        +-------------------------------------------------------+
+        |${MAGENTA}Creating Deployment Jenkins on Kubernetes in namespace: $jenkins_namespace${ENDCOLOR}
+        +-------------------------------------------------------+
+        "
 }
 
 

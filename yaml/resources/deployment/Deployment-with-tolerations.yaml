@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-deployment-with-tolerations
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: example-app-with-tolerations  
+  template:
+    metadata:
+      labels:
+        app: example-app-with-tolerations  
+    spec:
+      tolerations:
+      - key: "example-key"
+        operator: "Equal"
+        value: "example-value"
+        effect: "NoSchedule"
+      containers:
+      - name: example-container  
+        image: nginx:latest 
