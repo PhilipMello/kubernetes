@@ -166,8 +166,13 @@ function ktools_k8s(){
             +-------------------------------------------------------+
             "
         sudo curl -sLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-        sudo chmod +x kubectl
-        sudo mv kubectl /usr/local/bin/
+        sudo chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+		which kubectl > /dev/null 2>&1
+        [ $? -eq 0 ] && echo -e "
+            +-------------------------------------------------------+
+            |${GREEN}Kubectl installed successfully${ENDCOLOR}
+            +-------------------------------------------------------+
+            " && exit $?
     ;;
     2)
         echo -e "Kubernetes Official Documentation: 
